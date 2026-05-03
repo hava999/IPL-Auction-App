@@ -232,6 +232,13 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
 .big-btn:active:not(:disabled){transform:scale(.96)}
 .big-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
 .big-btn.lead-btn{background:linear-gradient(135deg,var(--gr),#007e33);color:#fff;box-shadow:0 8px 28px rgba(0,200,81,.2)}
+.pass-btn{width:100%;max-width:320px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);font-size:.88rem;font-weight:800;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.05);color:#c8d0e0}
+.pass-btn:hover:not(:disabled){background:rgba(255,255,255,.09)}
+.pass-btn:disabled{opacity:.45;cursor:not-allowed}
+.pass-btn.active-pass{background:rgba(255,107,107,.12);border-color:rgba(255,107,107,.32);color:#ff9d9d}
+.pass-status{font-size:.7rem;color:#888;text-align:center;line-height:1.5}
+.host-pass-box{margin-top:7px;padding:8px 9px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);font-size:.72rem;color:#9ba6be;text-align:center;line-height:1.5}
+.host-pass-box.ready{border-color:rgba(255,165,0,.3);color:#ffb66f;background:rgba(255,165,0,.08)}
 .bid-sub{font-size:.76rem;color:#777;text-align:center}
 .bid-sub.yl{color:var(--gr);font-weight:600}
 .bid-sub.warn{color:#ffa500;font-weight:600}
@@ -525,7 +532,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
           <div class="bb-nxt" id="h-nxt"></div>
         </div>
       </div>
-      <div class="hctrl">
+      <div class="hctrl" id="hctrl">
         <div class="hctrl-t">🎤 Host Controls</div>
         <div class="hctrl-row">
           <button class="hb hb-sold" id="hb-sold" onclick="hSold()">🔨 SOLD!</button>
@@ -617,7 +624,9 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
       <div class="restrict-bar" id="b-restrict"></div>
       <div class="bid-action">
         <button class="big-btn" id="big-btn" onclick="doBid()" disabled>Waiting for host...</button>
+        <button class="pass-btn" id="pass-btn" onclick="passOnPlayer()" disabled>🙅 Not Interested</button>
         <div class="bid-sub" id="bid-sub"></div>
+        <div class="pass-status" id="pass-status"></div>
         <div class="conn-status ok" id="conn-status">● Connected to host</div>
       </div>
     </div>
@@ -842,7 +851,7 @@ let suppressAutoRestore=false;
 
 // ═══════ GLOBAL STATE ═══════
 let G={teams:[],Q:[],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,ts:Date.now(),
-       phase:'lobby',sold:0,unsold:0,skipped:0,numT:2,paused:false,pauseRem:SECS,relisted:false,
+       phase:'lobby',sold:0,unsold:0,skipped:0,numT:2,paused:false,pauseRem:SECS,relisted:false,passed:{},
        chat:[] };
 
 function persistSession(){
@@ -862,7 +871,7 @@ function loadSession(){
 function setupFreshAuction(num){
   const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort(()=>Math.random()-.5);
   G={teams:[],Q:[...mq,...rest],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
-     ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,chat:[]};
+     ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,passed:{},chat:[]};
   bidHistory=[];auctionLog=[];unreadChat=0;pendingPauseReq=null;
   persistSession();
 }
@@ -1002,15 +1011,26 @@ function handleBidderMsg(conn,msg){
     const me=G.teams.find(t=>t.id===conn.peer);if(!me) return;
     const p=G.Q[G.idx];if(!p) return;
     if(G.bidder===conn.peer) return;
+    if(G.passed?.[conn.peer]) return;
     const{ok}=canBid(me,p);if(!ok) return;
     const nb=G.bidder?G.bid+inc(G.bid):p.b;
     if(me.purse-nb<MIN_R) return;
+    if(G.passed?.[conn.peer]) delete G.passed[conn.peer];
     G.bid=nb;G.bidder=conn.peer;G.ts=Date.now();
     // Record bid history
     bidHistory.unshift({team:me.name,color:me.color,amt:nb,ts:Date.now()});
     if(bidHistory.length>20) bidHistory.pop();
     broadcast();startTick();playBid();
     renderBidHist();
+  }
+  if(msg.type==='PASS'){
+    if(G.phase!=='bidding'||G.paused) return;
+    const me=G.teams.find(t=>t.id===conn.peer);if(!me) return;
+    const p=G.Q[G.idx];if(!p) return;
+    if(msg.pid!==p.id) return;
+    G.passed=G.passed||{};
+    G.passed[conn.peer]=true;
+    broadcast();
   }
   if(msg.type==='CHAT'){
     const t=G.teams.find(t=>t.id===conn.peer);
@@ -1098,12 +1118,17 @@ function recoverBidderSession(){
   doJoin();
 }
 function doBid(){if(!bidderConn||G.phase!=='bidding'||G.paused) return;bidderConn.send({type:'BID'});}
+function passOnPlayer(){
+  if(!bidderConn||G.phase!=='bidding'||G.paused) return;
+  const p=G.Q[G.idx];if(!p) return;
+  bidderConn.send({type:'PASS',pid:p.id});
+}
 
 // ═══════ HOST CONTROLS ═══════
 function doStart(){
   if(!amHost) return;
   G.phase='bidding';G.idx=0;G.bid=0;G.bidder=null;G.ts=Date.now();
-  G.sold=0;G.unsold=0;G.skipped=0;G.paused=false;
+  G.sold=0;G.unsold=0;G.skipped=0;G.paused=false;G.passed={};
   broadcast();go('pg-host');startTick();
   systemChat('Auction started! Good luck everyone 🏏');
 }
@@ -1116,7 +1141,7 @@ function hSkip(){
   const p=G.Q[G.idx];
   if(p){G.skippedList.push({...p,status:'skipped'});G.skipped++;}
   G.Q.splice(G.idx,1);G.Q.push(p);
-  G.bid=0;G.bidder=null;G.ts=Date.now();G.phase='bidding';
+  G.bid=0;G.bidder=null;G.ts=Date.now();G.phase='bidding';G.passed={};
   broadcast();startTick();
 }
 function togglePause(){
@@ -1419,7 +1444,7 @@ function doUnsold(){
 function advance(){
   G.idx++;
   bidHistory=[];renderBidHist();
-  G.bid=0;G.bidder=null;G.ts=Date.now();
+  G.bid=0;G.bidder=null;G.ts=Date.now();G.passed={};
   if(G.idx>=G.Q.length){
     const unsoldRemain=G.unsoldList.filter(p=>p.status==='unsold');
     if(unsoldRemain.length>0&&!G.relisted){
@@ -1500,6 +1525,8 @@ function renderHostUI(){
   } else {
     setT('h-amt',F(p.b));setT('h-who','No bids yet');setT('h-nxt','Opens at '+F(p.b));
   }
+  const passedTeams=G.teams.filter(t=>(G.passed||{})[t.id]).map(t=>t.name);
+  const allPassed=G.teams.length>0&&passedTeams.length===G.teams.length&&!G.bidder;
   el('hb-sold').disabled=!G.bidder||G.phase!=='bidding';
   el('hb-relist').disabled=!G.unsoldList.filter(p=>p.status==='unsold').length;
   // Teams sidebar
@@ -1510,6 +1537,7 @@ function renderHostUI(){
       `<span class="tag ${r.ovFull?'tag-warn':'tag-ok'}">${r.ov}/8 OV</span>`,
       `<span class="tag ${r.unOk?'tag-ok':'tag-warn'}">${r.un}/${MIN_UNCAPPED} UC</span>`,
       `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-warn'}">${r.tot}/${MAX_P}</span>`,
+      `${(G.passed||{})[t.id]?'<span class="tag tag-err">Passed</span>':''}`,
     ].join('');
     const isLead=t.id===G.bidder;
     return`<div class="tc${isLead?' lead':''}">
@@ -1527,6 +1555,14 @@ function renderHostUI(){
       <div><div class="qi-n">${p.n}${p.mq?' ⭐':''}</div><div class="qi-r">${RL(p.r)} · ${p.c}</div></div>
       <div class="qi-p">${F(p.b)}</div>
     </div>`).join('');
+  el('h-pass-box')?.remove();
+  const box=document.createElement('div');
+  box.id='h-pass-box';
+  box.className='host-pass-box'+(allPassed?' ready':'');
+  box.textContent=allPassed
+    ?'Everyone passed on this player. Host can skip immediately.'
+    :(passedTeams.length?`${passedTeams.length} team(s) passed: ${passedTeams.join(', ')}`:'No pass signals yet.');
+  el('hctrl')?.appendChild(box);
 }
 function renderBidHist(){
   const c=el('h-bid-hist');if(!c) return;
@@ -1586,26 +1622,43 @@ function renderBidderUI(){
     ].join('');
   }
   // BID button
-  const btn=el('big-btn'),sub=el('bid-sub');
+  const btn=el('big-btn'),sub=el('bid-sub'),passBtn=el('pass-btn'),passStatus=el('pass-status');
   if(!btn||!sub||!me) return;
+  const iPassed=!!(G.passed||{})[myTid];
+  const passedCount=Object.keys(G.passed||{}).length;
   if(G.phase!=='bidding'||G.paused){
     btn.disabled=true;
     btn.textContent=G.paused?'⏸ Paused':G.phase==='sold'?'🔨 SOLD!':G.phase==='unsold'?'❌ Unsold':'⏳ Waiting...';
-    btn.className='big-btn';sub.textContent='';sub.className='bid-sub';return;
+    btn.className='big-btn';sub.textContent='';sub.className='bid-sub';
+    if(passBtn){passBtn.disabled=true;passBtn.className='pass-btn';}
+    if(passStatus) passStatus.textContent='';
+    return;
   }
   const iLead=G.bidder===myTid;
   const nb=G.bidder?G.bid+inc(G.bid):p.b;
   const{ok,reason}=canBid(me,p);
-  btn.disabled=!ok||iLead;
+  btn.disabled=!ok||iLead||iPassed;
   if(iLead){
     btn.textContent=`🏆 You Lead — ${F(G.bid)}`;btn.className='big-btn lead-btn';
     sub.textContent='Defend your bid! Opponents bidding...';sub.className='bid-sub yl';
+    if(passStatus) passStatus.textContent=`${passedCount} team(s) not interested yet`;
   } else if(!ok){
     btn.textContent=reason||'Cannot Bid';btn.className='big-btn';
     sub.textContent='';sub.className='bid-sub';
+    if(passStatus) passStatus.textContent=`${passedCount} team(s) not interested yet`;
+  } else if(iPassed){
+    btn.textContent='Passed On This Player';btn.className='big-btn';
+    sub.textContent='You marked not interested for this player.';sub.className='bid-sub warn';
+    if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed`;
   } else {
     btn.textContent=`🔔 BID  ${F(nb)}`;btn.className='big-btn';
     sub.textContent=`Purse left: ${F(me.purse-nb)} after this`;sub.className='bid-sub';
+    if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed so far`;
+  }
+  if(passBtn){
+    passBtn.disabled=iLead||iPassed;
+    passBtn.className='pass-btn'+(iPassed?' active-pass':'');
+    passBtn.textContent=iPassed?'🙅 Not Interested Sent':'🙅 Not Interested';
   }
   renderSquadsTab();renderUnsoldTab();renderPurseTab();renderWatchTab();
 }
