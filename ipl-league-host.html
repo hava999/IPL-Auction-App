@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPL League Host Manager</title>
+<style>
+  :root{
+    --bg:#07111f;
+    --bg2:#0d1b31;
+    --panel:rgba(255,255,255,.06);
+    --panel2:rgba(255,255,255,.04);
+    --line:rgba(255,255,255,.12);
+    --text:#f5f7fb;
+    --muted:#91a1bd;
+    --gold:#f7c948;
+    --orange:#ff8c42;
+    --green:#3ddc97;
+    --blue:#56b6ff;
+    --red:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Georgia, "Times New Roman", serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at top left, rgba(247,201,72,.08), transparent 30%),
+      radial-gradient(circle at top right, rgba(86,182,255,.12), transparent 28%),
+      linear-gradient(180deg, var(--bg), var(--bg2));
+    min-height:100vh;
+  }
+  .page{max-width:1280px;margin:0 auto;padding:24px 18px 48px}
+  .hero{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .hero h1{
+    margin:0;
+    font-size:clamp(2rem,4vw,3.3rem);
+    line-height:1;
+    letter-spacing:.03em;
+    color:var(--gold);
+  }
+  .hero p{margin:8px 0 0;color:var(--muted);max-width:720px;font-size:.98rem;line-height:1.6}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+  button,.file-label{
+    border:none;
+    border-radius:12px;
+    padding:11px 15px;
+    font-size:.92rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:.18s ease;
+  }
+  button:hover,.file-label:hover{transform:translateY(-1px)}
+  .btn-primary{background:linear-gradient(135deg,var(--gold),var(--orange));color:#1f1400}
+  .btn-secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line)}
+  .btn-danger{background:rgba(255,107,107,.12);color:#ffb2b2;border:1px solid rgba(255,107,107,.35)}
+  .layout{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+  .panel{
+    background:var(--panel);
+    border:1px solid rgba(247,201,72,.12);
+    border-radius:20px;
+    padding:18px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 20px 50px rgba(0,0,0,.18);
+  }
+  .panel h2{
+    margin:0 0 12px;
+    color:var(--gold);
+    font-size:1.05rem;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .hint{color:var(--muted);font-size:.84rem;line-height:1.6}
+  .setup-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
+  .team-card{
+    background:var(--panel2);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px;
+  }
+  .team-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .badge{
+    width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    color:#07111f;font-weight:900;font-size:.8rem;
+  }
+  label{display:block;font-size:.73rem;color:var(--muted);margin:10px 0 6px;text-transform:uppercase;letter-spacing:.08em}
+  input[type="text"],input[type="number"],input[type="date"],select,textarea{
+    width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);
+    background:rgba(5,11,22,.5);color:var(--text);font:inherit;outline:none;
+  }
+  textarea{min-height:116px;resize:vertical}
+  .meta{font-size:.72rem;color:var(--muted);margin-top:8px}
+  .ocr-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .ocr-btn{
+    background:rgba(86,182,255,.12);color:#a8daff;border:1px solid rgba(86,182,255,.28);
+    padding:8px 10px;border-radius:10px;font-size:.76rem;font-weight:800;cursor:pointer
+  }
+  .ocr-status{font-size:.72rem;color:var(--muted);margin-top:8px;line-height:1.5}
+  .ocr-preview-name{font-size:.7rem;color:#9ed6ff;margin-top:6px}
+  .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{
+    background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center;
+  }
+  .stat strong{display:block;font-size:1.5rem;color:var(--gold)}
+  .stat span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+  .table-wrap{overflow:auto}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.06);font-size:.84rem;white-space:nowrap}
+  th{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:left}
+  td.num,th.num{text-align:right}
+  tbody tr:nth-child(1){background:rgba(247,201,72,.08)}
+  .fixtures{display:flex;flex-direction:column;gap:12px}
+  .fixture{
+    background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px;
+  }
+  .fixture-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .fixture-round{font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}
+  .fixture-title{font-size:1rem;font-weight:800;margin-top:3px}
+  .fixture-sub{font-size:.78rem;color:var(--muted);margin-top:4px}
+  .pill{
+    border-radius:999px;padding:5px 10px;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em
+  }
+  .pending{background:rgba(86,182,255,.12);color:#9ed6ff}
+  .done{background:rgba(61,220,151,.12);color:#9df0c9}
+  .nr{background:rgba(255,140,66,.14);color:#ffc08d}
+  .fixture-body{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin-top:12px}
+  .fixture-result{font-size:.83rem;line-height:1.7;color:#dfe7f4}
+  .fixture-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .mini{padding:9px 11px;font-size:.78rem;border-radius:10px}
+  .mini.primary{background:rgba(247,201,72,.12);color:var(--gold);border:1px solid rgba(247,201,72,.3)}
+  .squad-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .squad-box{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:12px}
+  .squad-list{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chip{font-size:.73rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);padding:6px 9px;border-radius:999px;color:#e6edf9}
+  .empty{padding:20px;text-align:center;color:var(--muted);font-size:.85rem}
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(3,7,15,.84);display:none;align-items:center;justify-content:center;
+    padding:18px;z-index:20;
+  }
+  .modal{
+    width:min(920px,100%);max-height:92vh;overflow:auto;background:#091526;border:1px solid rgba(247,201,72,.16);
+    border-radius:22px;padding:18px 18px 20px;
+  }
+  .modal-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}
+  .modal-head h3{margin:0;color:var(--gold);font-size:1.2rem}
+  .close{
+    background:none;border:none;color:var(--muted);font-size:1.6rem;padding:0 6px;cursor:pointer
+  }
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .innings{
+    background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px
+  }
+  .innings h4{margin:0 0 10px;font-size:1rem}
+  .triple{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .upload{
+    background:rgba(247,201,72,.04);border:1px dashed rgba(247,201,72,.28);border-radius:16px;padding:14px
+  }
+  .file-label{display:inline-flex;background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--line)}
+  .preview{margin-top:12px}
+  .preview img{
+    width:100%;max-height:260px;object-fit:contain;border-radius:14px;border:1px solid var(--line);background:#050b14
+  }
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;flex-wrap:wrap}
+  .muted{color:var(--muted)}
+  input[type="file"]{display:none}
+  @media (max-width: 980px){
+    .layout,.form-grid,.fixture-body{grid-template-columns:1fr}
+  }
+  @media (max-width: 720px){
+    .setup-grid,.squad-grid,.stats-strip,.triple{grid-template-columns:1fr}
+    .page{padding:18px 14px 36px}
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <div>
+        <h1>IPL League Host</h1>
+        <p>Set up 4 teams, paste each squad once, generate a random double round-robin fixture list, and update every match with a full-scoreboard screenshot plus scores. The table updates automatically with points and NRR.</p>
+      </div>
+      <div class="toolbar">
+        <button class="btn-secondary" id="newLeagueBtn">New League</button>
+        <button class="btn-secondary" id="downloadBtn">Export Data</button>
+        <button class="btn-danger" id="resetBtn">Reset League</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <h2>League Setup</h2>
+        <div class="hint">Enter the 4 team names and squads. Use one player per line in the squad box. When everything is ready, click <strong>Generate Fixtures</strong>. You can still edit squads later if needed.</div>
+        <div class="setup-grid" id="setupGrid"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+          <button class="btn-primary" id="generateBtn">Generate Fixtures</button>
+          <button class="btn-secondary" id="saveSetupBtn">Save Setup</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Squads</h2>
+        <div id="squadPreview"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:18px">
+      <h2>Points Table</h2>
+      <div class="stats-strip">
+        <div class="stat"><strong id="statTeams">4</strong><span>Teams</span></div>
+        <div class="stat"><strong id="statMatches">0</strong><span>Matches</span></div>
+        <div class="stat"><strong id="statDone">0</strong><span>Completed</span></div>
+        <div class="stat"><strong id="statLeft">0</strong><span>Remaining</span></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pos</th>
+              <th>Team</th>
+              <th class="num">P</th>
+              <th class="num">W</th>
+              <th class="num">L</th>
+              <th class="num">NR</th>
+              <th class="num">Pts</th>
+              <th class="num">RF</th>
+              <th class="num">OF</th>
+              <th class="num">RA</th>
+              <th class="num">OB</th>
+              <th class="num">NRR</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="layout" style="margin-top:18px">
+      <div class="panel">
+        <h2>Fixtures</h2>
+        <div id="fixtureList" class="fixtures"></div>
+      </div>
+      <div class="panel">
+        <h2>League Notes</h2>
+        <div class="hint">
+          Points system:
+          <br>Win = 2 points
+          <br>No Result = 1 point each
+          <br>Loss = 0 points
+          <br><br>NRR is calculated from match score entries:
+          <br>(Runs scored / overs faced) - (Runs conceded / overs bowled)
+          <br><br>The uploaded scoreboard screenshot is stored in your browser as match proof, so use the same device/browser for hosting this league.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="matchModal">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h3 id="modalTitle">Update Match</h3>
+          <div class="muted" id="modalSubtitle"></div>
+        </div>
+        <button class="close" id="closeModalBtn">&times;</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="innings">
+          <h4 id="teamAHeading">Team A</h4>
+          <div class="triple">
+            <div>
+              <label>Runs</label>
+              <input type="number" id="aRuns" min="0" placeholder="182">
+            </div>
+            <div>
+              <label>Wickets</label>
+              <input type="number" id="aWkts" min="0" max="10" placeholder="6">
+            </div>
+            <div>
+              <label>Overs</label>
+              <input type="text" id="aOvers" placeholder="20 or 19.3">
+            </div>
+          </div>
+        </div>
+
+        <div class="innings">
+          <h4 id="teamBHeading">Team B</h4>
+          <div class="triple">
+            <div>
+              <label>Runs</label>
+              <input type="number" id="bRuns" min="0" placeholder="176">
+            </div>
+            <div>
+              <label>Wickets</label>
+              <input type="number" id="bWkts" min="0" max="10" placeholder="8">
+            </div>
+            <div>
+              <label>Overs</label>
+              <input type="text" id="bOvers" placeholder="20 or 18.4">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-grid" style="margin-top:14px">
+        <div class="league-form">
+          <label>Match Date</label>
+          <input type="date" id="matchDate">
+
+          <label>Result Type</label>
+          <select id="resultType">
+            <option value="auto">Auto decide from score</option>
+            <option value="teamA">Mark Team A as winner</option>
+            <option value="teamB">Mark Team B as winner</option>
+            <option value="noresult">No result / abandoned</option>
+          </select>
+
+          <label>Match Note</label>
+          <input type="text" id="matchNote" placeholder="Won by 8 runs / 6 wickets / rain affected">
+        </div>
+
+        <div class="upload">
+          <div style="font-weight:800;margin-bottom:6px">Full Scoreboard Screenshot</div>
+          <div class="muted" style="font-size:.82rem;line-height:1.5">Upload the match scoreboard image after every game. This stays attached to the fixture as your host record.</div>
+          <label class="file-label" for="scoreboardFile" style="margin-top:12px">Choose Screenshot</label>
+          <input type="file" id="scoreboardFile" accept="image/*">
+          <div class="preview" id="scoreboardPreview"></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="clearResultBtn">Clear Result</button>
+        <button class="btn-secondary" id="cancelBtn">Cancel</button>
+        <button class="btn-primary" id="saveResultBtn">Save Match Result</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const STORAGE_KEY = 'ipl-league-host-v1';
+const TEAM_COLORS = ['#f7c948','#56b6ff','#3ddc97','#ff8c42'];
+
+const initialState = () => ({
+  teams: Array.from({length:4}, (_, i) => ({
+    id: `team-${i + 1}`,
+    name: '',
+    color: TEAM_COLORS[i],
+    squad: []
+  })),
+  fixtures: [],
+  currentMatchId: null
+});
+
+let state = loadState();
+let ocrWorker = null;
+let activeOcrJobs = new Set();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return initialState();
+    const parsed = JSON.parse(raw);
+    return {
+      teams: (parsed.teams || initialState().teams).map((team, i) => ({
+        id: team.id || `team-${i + 1}`,
+        name: team.name || '',
+        color: team.color || TEAM_COLORS[i],
+        squad: Array.isArray(team.squad) ? team.squad : []
+      })),
+      fixtures: Array.isArray(parsed.fixtures) ? parsed.fixtures : [],
+      currentMatchId: null
+    };
+  }catch{
+    return initialState();
+  }
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    teams: state.teams,
+    fixtures: state.fixtures
+  }));
+}
+
+function el(id){
+  return document.getElementById(id);
+}
+
+function shuffle(items){
+  const copy = [...items];
+  for(let i = copy.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function parseSquad(text){
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+}
+
+function toOversNumber(value){
+  if(value === '' || value === null || value === undefined) return 0;
+  const text = String(value).trim();
+  if(!text) return 0;
+  if(!text.includes('.')) return Number(text) || 0;
+  const [oversPart, ballsPart] = text.split('.');
+  const overs = Number(oversPart) || 0;
+  const balls = Number(ballsPart) || 0;
+  return overs + Math.min(balls, 5) / 6;
+}
+
+function formatOvers(value){
+  const n = Number(value || 0);
+  return n ? n.toFixed(1).replace(/\.0$/, '') : '0';
+}
+
+function makeFixtures(teams){
+  const matches = [];
+  let matchNo = 1;
+  let roundNo = 1;
+
+  for(let cycle = 0; cycle < 2; cycle++){
+    const pairings = [];
+    for(let i = 0; i < teams.length; i++){
+      for(let j = i + 1; j < teams.length; j++){
+        pairings.push({
+          id: `match-${Date.now()}-${cycle}-${i}-${j}-${Math.random().toString(36).slice(2,7)}`,
+          matchNo: matchNo++,
+          round: roundNo++,
+          teamAId: cycle === 0 ? teams[i].id : teams[j].id,
+          teamBId: cycle === 0 ? teams[j].id : teams[i].id,
+          result: null
+        });
+      }
+    }
+    matches.push(...shuffle(pairings));
+  }
+
+  return matches.map((match, index) => ({
+    ...match,
+    round: index + 1
+  }));
+}
+
+function getTeam(teamId){
+  return state.teams.find(team => team.id === teamId);
+}
+
+function getTableRows(){
+  const table = state.teams.map(team => ({
+    id: team.id,
+    name: team.name || 'Unnamed Team',
+    color: team.color,
+    played: 0,
+    wins: 0,
+    losses: 0,
+    noResults: 0,
+    points: 0,
+    runsFor: 0,
+    oversFaced: 0,
+    runsAgainst: 0,
+    oversBowled: 0
+  }));
+
+  const rowById = Object.fromEntries(table.map(row => [row.id, row]));
+
+  state.fixtures.forEach(match => {
+    const result = match.result;
+    if(!result) return;
+    const a = rowById[match.teamAId];
+    const b = rowById[match.teamBId];
+    if(!a || !b) return;
+
+    a.played += 1;
+    b.played += 1;
+
+    a.runsFor += Number(result.teamA.runs || 0);
+    a.oversFaced += toOversNumber(result.teamA.overs || 0);
+    a.runsAgainst += Number(result.teamB.runs || 0);
+    a.oversBowled += toOversNumber(result.teamB.overs || 0);
+
+    b.runsFor += Number(result.teamB.runs || 0);
+    b.oversFaced += toOversNumber(result.teamB.overs || 0);
+    b.runsAgainst += Number(result.teamA.runs || 0);
+    b.oversBowled += toOversNumber(result.teamA.overs || 0);
+
+    if(result.outcome === 'noresult'){
+      a.noResults += 1;
+      b.noResults += 1;
+      a.points += 1;
+      b.points += 1;
+    }else if(result.winnerId === match.teamAId){
+      a.wins += 1;
+      a.points += 2;
+      b.losses += 1;
+    }else if(result.winnerId === match.teamBId){
+      b.wins += 1;
+      b.points += 2;
+      a.losses += 1;
+    }
+  });
+
+  table.forEach(row => {
+    const forRate = row.oversFaced > 0 ? row.runsFor / row.oversFaced : 0;
+    const againstRate = row.oversBowled > 0 ? row.runsAgainst / row.oversBowled : 0;
+    row.nrr = forRate - againstRate;
+  });
+
+  return table.sort((a, b) =>
+    b.points - a.points ||
+    b.nrr - a.nrr ||
+    b.wins - a.wins ||
+    a.name.localeCompare(b.name)
+  );
+}
+
+function renderSetup(){
+  el('setupGrid').innerHTML = state.teams.map((team, index) => `
+    <div class="team-card">
+      <div class="team-head">
+        <div class="badge" style="background:${team.color}">${index + 1}</div>
+        <div>
+          <div style="font-weight:800">${team.name || `Team ${index + 1}`}</div>
+          <div class="muted" style="font-size:.74rem">League team setup</div>
+        </div>
+      </div>
+      <label>Team Name</label>
+      <input type="text" data-team-name="${team.id}" value="${escapeHtml(team.name)}" placeholder="Enter franchise name">
+      <label>Squad</label>
+      <textarea data-team-squad="${team.id}" placeholder="One player per line">${escapeHtml(team.squad.join('\n'))}</textarea>
+      <div class="ocr-row">
+        <label class="file-label" for="ocr-file-${team.id}" style="margin:0">Upload Squad Image</label>
+        <input type="file" id="ocr-file-${team.id}" data-team-ocr-file="${team.id}" accept="image/*">
+        <button type="button" class="ocr-btn" data-team-run-ocr="${team.id}">Extract Squad From Image</button>
+      </div>
+      <div class="ocr-preview-name" id="ocr-file-name-${team.id}">No image selected</div>
+      <div class="ocr-status" id="ocr-status-${team.id}">Tip: if the first line in the screenshot is the team name, it will be used automatically.</div>
+      <div class="meta">${team.squad.length} players added</div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('[data-team-name]').forEach(input => {
+    input.addEventListener('input', event => {
+      const team = getTeam(event.target.dataset.teamName);
+      if(!team) return;
+      team.name = event.target.value;
+      saveState();
+      renderSquads();
+      renderTable();
+      renderFixtures();
+    });
+  });
+
+  document.querySelectorAll('[data-team-squad]').forEach(textarea => {
+    textarea.addEventListener('input', event => {
+      const team = getTeam(event.target.dataset.teamSquad);
+      if(!team) return;
+      team.squad = parseSquad(event.target.value);
+      saveState();
+      renderSquads();
+    });
+  });
+
+  document.querySelectorAll('[data-team-ocr-file]').forEach(input => {
+    input.addEventListener('change', event => {
+      const teamId = event.target.dataset.teamOcrFile;
+      const file = event.target.files[0];
+      el(`ocr-file-name-${teamId}`).textContent = file ? file.name : 'No image selected';
+      el(`ocr-status-${teamId}`).textContent = file
+        ? 'Image ready. Click "Extract Squad From Image".'
+        : 'Tip: if the first line in the screenshot is the team name, it will be used automatically.';
+    });
+  });
+
+  document.querySelectorAll('[data-team-run-ocr]').forEach(button => {
+    button.addEventListener('click', () => runSquadOcr(button.dataset.teamRunOcr));
+  });
+}
+
+function renderSquads(){
+  const hasAny = state.teams.some(team => team.name || team.squad.length);
+  if(!hasAny){
+    el('squadPreview').innerHTML = '<div class="empty">Add your 4 teams and squads to start the league.</div>';
+    return;
+  }
+
+  el('squadPreview').innerHTML = `<div class="squad-grid">
+    ${state.teams.map((team, index) => `
+      <div class="squad-box">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="badge" style="background:${team.color}">${index + 1}</div>
+          <div>
+            <div style="font-weight:800">${escapeHtml(team.name || `Team ${index + 1}`)}</div>
+            <div class="muted" style="font-size:.74rem">${team.squad.length} squad players</div>
+          </div>
+        </div>
+        <div class="squad-list">
+          ${team.squad.length
+            ? team.squad.map(player => `<span class="chip">${escapeHtml(player)}</span>`).join('')
+            : '<span class="muted" style="font-size:.8rem">No squad added yet.</span>'}
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function renderTable(){
+  const rows = getTableRows();
+  el('tableBody').innerHTML = rows.map((row, index) => `
+    <tr>
+      <td>${index + 1}</td>
+      <td><span style="color:${row.color};font-weight:800">${escapeHtml(row.name)}</span></td>
+      <td class="num">${row.played}</td>
+      <td class="num">${row.wins}</td>
+      <td class="num">${row.losses}</td>
+      <td class="num">${row.noResults}</td>
+      <td class="num" style="color:var(--gold);font-weight:800">${row.points}</td>
+      <td class="num">${row.runsFor}</td>
+      <td class="num">${formatOvers(row.oversFaced)}</td>
+      <td class="num">${row.runsAgainst}</td>
+      <td class="num">${formatOvers(row.oversBowled)}</td>
+      <td class="num">${row.nrr >= 0 ? '+' : ''}${row.nrr.toFixed(3)}</td>
+    </tr>
+  `).join('');
+
+  el('statMatches').textContent = state.fixtures.length;
+  el('statDone').textContent = state.fixtures.filter(match => match.result).length;
+  el('statLeft').textContent = state.fixtures.filter(match => !match.result).length;
+}
+
+function renderFixtures(){
+  if(!state.fixtures.length){
+    el('fixtureList').innerHTML = '<div class="empty">No fixtures yet. Generate fixtures once all 4 teams are ready.</div>';
+    return;
+  }
+
+  el('fixtureList').innerHTML = state.fixtures.map(match => {
+    const teamA = getTeam(match.teamAId);
+    const teamB = getTeam(match.teamBId);
+    const result = match.result;
+    const statusClass = !result ? 'pending' : result.outcome === 'noresult' ? 'nr' : 'done';
+    const statusText = !result ? 'Pending' : result.outcome === 'noresult' ? 'No Result' : 'Completed';
+
+    let resultLine = 'Result pending.';
+    let proofLine = 'No screenshot uploaded yet.';
+
+    if(result){
+      const winnerText = result.outcome === 'noresult'
+        ? 'Match marked as no result.'
+        : `${escapeHtml(getTeam(result.winnerId)?.name || 'Winner')} won.`;
+      resultLine = `
+        ${winnerText}<br>
+        ${escapeHtml(teamA?.name || 'Team A')}: ${result.teamA.runs}/${result.teamA.wickets} in ${escapeHtml(String(result.teamA.overs || 0))} ov<br>
+        ${escapeHtml(teamB?.name || 'Team B')}: ${result.teamB.runs}/${result.teamB.wickets} in ${escapeHtml(String(result.teamB.overs || 0))} ov
+        ${result.note ? `<br><span class="muted">${escapeHtml(result.note)}</span>` : ''}
+      `;
+      proofLine = result.screenshot ? 'Scoreboard screenshot attached.' : 'Result saved without screenshot.';
+    }
+
+    return `
+      <div class="fixture">
+        <div class="fixture-top">
+          <div>
+            <div class="fixture-round">Round ${match.round} · Match ${match.matchNo}</div>
+            <div class="fixture-title">${escapeHtml(teamA?.name || 'Team A')} vs ${escapeHtml(teamB?.name || 'Team B')}</div>
+            <div class="fixture-sub">${result?.date ? `Played on ${escapeHtml(result.date)}` : 'Host league fixture'}</div>
+          </div>
+          <div class="pill ${statusClass}">${statusText}</div>
+        </div>
+        <div class="fixture-body">
+          <div>
+            <div class="fixture-result">${resultLine}</div>
+            <div class="fixture-sub" style="margin-top:6px">${proofLine}</div>
+          </div>
+          <div class="fixture-actions">
+            <button class="btn-secondary mini" data-edit-match="${match.id}">${result ? 'Edit Result' : 'Update Match'}</button>
+            ${result?.screenshot ? `<button class="mini primary" data-view-shot="${match.id}">View Screenshot</button>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('[data-edit-match]').forEach(button => {
+    button.addEventListener('click', () => openMatchModal(button.dataset.editMatch));
+  });
+
+  document.querySelectorAll('[data-view-shot]').forEach(button => {
+    button.addEventListener('click', () => {
+      const match = state.fixtures.find(item => item.id === button.dataset.viewShot);
+      if(match?.result?.screenshot){
+        openMatchModal(match.id, true);
+      }
+    });
+  });
+}
+
+function openMatchModal(matchId, focusPreview = false){
+  const match = state.fixtures.find(item => item.id === matchId);
+  if(!match) return;
+  state.currentMatchId = matchId;
+  const teamA = getTeam(match.teamAId);
+  const teamB = getTeam(match.teamBId);
+  const result = match.result;
+
+  el('modalTitle').textContent = `${teamA?.name || 'Team A'} vs ${teamB?.name || 'Team B'}`;
+  el('modalSubtitle').textContent = `Round ${match.round} · Match ${match.matchNo}`;
+  el('teamAHeading').textContent = teamA?.name || 'Team A';
+  el('teamBHeading').textContent = teamB?.name || 'Team B';
+
+  el('aRuns').value = result?.teamA?.runs ?? '';
+  el('aWkts').value = result?.teamA?.wickets ?? '';
+  el('aOvers').value = result?.teamA?.overs ?? '';
+  el('bRuns').value = result?.teamB?.runs ?? '';
+  el('bWkts').value = result?.teamB?.wickets ?? '';
+  el('bOvers').value = result?.teamB?.overs ?? '';
+  el('matchDate').value = result?.date ?? '';
+  el('resultType').value = result?.outcome === 'noresult'
+    ? 'noresult'
+    : result?.winnerId === match.teamAId
+      ? 'teamA'
+      : result?.winnerId === match.teamBId
+        ? 'teamB'
+        : 'auto';
+  el('matchNote').value = result?.note ?? '';
+  renderPreview(result?.screenshot || '');
+
+  el('matchModal').style.display = 'flex';
+  if(focusPreview && result?.screenshot){
+    el('scoreboardPreview').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+}
+
+function closeMatchModal(){
+  state.currentMatchId = null;
+  el('matchModal').style.display = 'none';
+  el('scoreboardFile').value = '';
+}
+
+function renderPreview(src){
+  el('scoreboardPreview').innerHTML = src ? `<img src="${src}" alt="Scoreboard screenshot preview">` : '<div class="muted" style="margin-top:10px;font-size:.82rem">No screenshot selected.</div>';
+}
+
+function readFileAsDataUrl(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function deriveResult(match, form){
+  if(form.resultType === 'noresult'){
+    return { outcome:'noresult', winnerId:null };
+  }
+  if(form.resultType === 'teamA'){
+    return { outcome:'completed', winnerId:match.teamAId };
+  }
+  if(form.resultType === 'teamB'){
+    return { outcome:'completed', winnerId:match.teamBId };
+  }
+  if(form.teamA.runs > form.teamB.runs){
+    return { outcome:'completed', winnerId:match.teamAId };
+  }
+  if(form.teamB.runs > form.teamA.runs){
+    return { outcome:'completed', winnerId:match.teamBId };
+  }
+  return { outcome:'noresult', winnerId:null };
+}
+
+async function saveMatchResult(){
+  const match = state.fixtures.find(item => item.id === state.currentMatchId);
+  if(!match) return;
+
+  const form = {
+    teamA: {
+      runs: Number(el('aRuns').value || 0),
+      wickets: Number(el('aWkts').value || 0),
+      overs: el('aOvers').value.trim() || '0'
+    },
+    teamB: {
+      runs: Number(el('bRuns').value || 0),
+      wickets: Number(el('bWkts').value || 0),
+      overs: el('bOvers').value.trim() || '0'
+    },
+    date: el('matchDate').value,
+    resultType: el('resultType').value,
+    note: el('matchNote').value.trim()
+  };
+
+  const hasScore = form.teamA.overs !== '0' || form.teamB.overs !== '0' || form.teamA.runs || form.teamB.runs;
+  if(!hasScore && form.resultType !== 'noresult'){
+    alert('Enter the match score before saving the result.');
+    return;
+  }
+
+  const summary = deriveResult(match, form);
+  const file = el('scoreboardFile').files[0];
+  const existingShot = match.result?.screenshot || '';
+  const screenshot = file ? await readFileAsDataUrl(file) : existingShot;
+
+  match.result = {
+    teamA: form.teamA,
+    teamB: form.teamB,
+    date: form.date,
+    note: form.note,
+    screenshot,
+    outcome: summary.outcome,
+    winnerId: summary.winnerId
+  };
+
+  saveState();
+  renderTable();
+  renderFixtures();
+  closeMatchModal();
+}
+
+function clearMatchResult(){
+  const match = state.fixtures.find(item => item.id === state.currentMatchId);
+  if(!match) return;
+  if(!confirm('Clear the saved result for this fixture?')) return;
+  match.result = null;
+  saveState();
+  renderTable();
+  renderFixtures();
+  closeMatchModal();
+}
+
+function validateTeams(){
+  const namedTeams = state.teams.filter(team => team.name.trim());
+  if(namedTeams.length !== 4){
+    alert('Please enter all 4 team names first.');
+    return false;
+  }
+  return true;
+}
+
+function saveSetupOnly(){
+  saveState();
+  renderSquads();
+  renderTable();
+  renderFixtures();
+  alert('League setup saved.');
+}
+
+function generateFixtures(){
+  if(!validateTeams()) return;
+  state.fixtures = makeFixtures(state.teams);
+  saveState();
+  renderTable();
+  renderFixtures();
+  alert('Random fixtures generated for the 4-team league.');
+}
+
+function exportData(){
+  const blob = new Blob([JSON.stringify({
+    exportedAt: new Date().toISOString(),
+    league: state
+  }, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'ipl-league-host-data.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function resetLeague(){
+  if(!confirm('Reset the full league setup, fixtures, screenshots, and table?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = initialState();
+  renderAll();
+}
+
+function newLeague(){
+  if(!confirm('Start a new league and clear the current fixtures/results? Team names and squads will also be cleared.')) return;
+  state = initialState();
+  saveState();
+  renderAll();
+}
+
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderAll(){
+  el('statTeams').textContent = state.teams.length;
+  renderSetup();
+  renderSquads();
+  renderTable();
+  renderFixtures();
+  saveState();
+}
+
+async function getOcrWorker(){
+  if(ocrWorker) return ocrWorker;
+  ocrWorker = await Tesseract.createWorker('eng');
+  return ocrWorker;
+}
+
+function normalizeOcrLines(text){
+  return text
+    .split('\n')
+    .map(line => line.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .filter(line => !/^squad$/i.test(line))
+    .filter(line => !/^players$/i.test(line))
+    .filter(line => !/^playing xi$/i.test(line))
+    .filter(line => !/^substitutes?$/i.test(line));
+}
+
+function looksLikeTeamName(line){
+  if(!line) return false;
+  if(line.length > 36) return false;
+  if(/\d/.test(line)) return false;
+  const words = line.split(' ').filter(Boolean);
+  return words.length >= 2 && words.length <= 5;
+}
+
+function titleCaseName(line){
+  return line
+    .toLowerCase()
+    .split(' ')
+    .filter(Boolean)
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+async function runSquadOcr(teamId){
+  const fileInput = el(`ocr-file-${teamId}`);
+  const file = fileInput?.files?.[0];
+  if(!file){
+    alert('Choose a squad image first.');
+    return;
+  }
+  if(activeOcrJobs.has(teamId)) return;
+
+  const team = getTeam(teamId);
+  if(!team) return;
+
+  activeOcrJobs.add(teamId);
+  el(`ocr-status-${teamId}`).textContent = 'Reading image and extracting text...';
+
+  try{
+    const worker = await getOcrWorker();
+    const imageUrl = await readFileAsDataUrl(file);
+    const result = await worker.recognize(imageUrl);
+    const lines = normalizeOcrLines(result.data.text || '');
+
+    if(!lines.length){
+      el(`ocr-status-${teamId}`).textContent = 'No readable text found. Try a clearer screenshot.';
+      return;
+    }
+
+    let detectedTeamName = '';
+    let squadLines = [...lines];
+
+    if(!team.name.trim() && looksLikeTeamName(lines[0])){
+      detectedTeamName = titleCaseName(lines[0]);
+      squadLines = lines.slice(1);
+    }
+
+    squadLines = squadLines
+      .map(line => line.replace(/^[\-\•\*\d\.\)\(]+\s*/, '').trim())
+      .filter(Boolean)
+      .filter((line, index, arr) => arr.indexOf(line) === index);
+
+    if(detectedTeamName){
+      team.name = detectedTeamName;
+    }
+    team.squad = squadLines;
+    saveState();
+    renderSetup();
+    renderSquads();
+    renderTable();
+    renderFixtures();
+
+    el(`ocr-status-${teamId}`).textContent = `OCR complete. ${squadLines.length} squad lines extracted${detectedTeamName ? ` and team name set to "${detectedTeamName}".` : '.'}`;
+  }catch(error){
+    console.error(error);
+    el(`ocr-status-${teamId}`).textContent = 'OCR failed on this image. Try a cleaner screenshot with high contrast.';
+  }finally{
+    activeOcrJobs.delete(teamId);
+  }
+}
+
+el('generateBtn').addEventListener('click', generateFixtures);
+el('saveSetupBtn').addEventListener('click', saveSetupOnly);
+el('downloadBtn').addEventListener('click', exportData);
+el('resetBtn').addEventListener('click', resetLeague);
+el('newLeagueBtn').addEventListener('click', newLeague);
+el('closeModalBtn').addEventListener('click', closeMatchModal);
+el('cancelBtn').addEventListener('click', closeMatchModal);
+el('saveResultBtn').addEventListener('click', saveMatchResult);
+el('clearResultBtn').addEventListener('click', clearMatchResult);
+el('scoreboardFile').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if(!file){
+    const current = state.fixtures.find(item => item.id === state.currentMatchId)?.result?.screenshot || '';
+    renderPreview(current);
+    return;
+  }
+  renderPreview(await readFileAsDataUrl(file));
+});
+el('matchModal').addEventListener('click', event => {
+  if(event.target === el('matchModal')) closeMatchModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>

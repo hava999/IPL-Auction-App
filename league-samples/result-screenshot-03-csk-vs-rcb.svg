@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1624"/>
+      <stop offset="100%" stop-color="#133650"/>
+    </linearGradient>
+    <linearGradient id="bar3" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#f7c948"/>
+      <stop offset="100%" stop-color="#48c2ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg3)"/>
+  <rect x="40" y="36" width="1520" height="72" rx="18" fill="#08111d" stroke="#61c9ff" stroke-opacity=".35"/>
+  <text x="80" y="82" fill="#f7c948" font-size="36" font-family="Arial" font-weight="700">CRICKET 26 STYLE TEST SCOREBOARD</text>
+  <text x="1195" y="82" fill="#aad8ee" font-size="24" font-family="Arial">MATCH 3 • LEAGUE STAGE</text>
+
+  <rect x="60" y="140" width="1480" height="170" rx="26" fill="#0b1a29" stroke="#234861"/>
+  <rect x="90" y="172" width="650" height="106" rx="18" fill="#0f3551"/>
+  <rect x="860" y="172" width="650" height="106" rx="18" fill="#5d1620"/>
+  <text x="120" y="218" fill="#84d7ff" font-size="30" font-family="Arial" font-weight="700">CHENNAI SUPER KINGS</text>
+  <text x="120" y="258" fill="#ffffff" font-size="66" font-family="Arial" font-weight="800">167/9</text>
+  <text x="410" y="258" fill="#b4d0df" font-size="28" font-family="Arial">20.0 overs</text>
+  <text x="890" y="218" fill="#ffc1c8" font-size="30" font-family="Arial" font-weight="700">ROYAL CHALLENGERS BENGALURU</text>
+  <text x="890" y="258" fill="#ffffff" font-size="66" font-family="Arial" font-weight="800">168/4</text>
+  <text x="1185" y="258" fill="#b4d0df" font-size="28" font-family="Arial">18.2 overs</text>
+  <rect x="520" y="282" width="560" height="34" rx="17" fill="url(#bar3)"/>
+  <text x="800" y="306" text-anchor="middle" fill="#10202c" font-size="20" font-family="Arial" font-weight="700">Royal Challengers Bengaluru won by 6 wickets</text>
+
+  <rect x="60" y="346" width="720" height="494" rx="24" fill="#0a1624" stroke="#234861"/>
+  <rect x="820" y="346" width="720" height="494" rx="24" fill="#0a1624" stroke="#234861"/>
+  <text x="100" y="398" fill="#f7c948" font-size="30" font-family="Arial" font-weight="700">CSK Batting</text>
+  <text x="860" y="398" fill="#f7c948" font-size="30" font-family="Arial" font-weight="700">RCB Chase</text>
+
+  <text x="100" y="442" fill="#97b4c3" font-size="20" font-family="Arial">Batter</text>
+  <text x="520" y="442" fill="#97b4c3" font-size="20" font-family="Arial">R</text>
+  <text x="590" y="442" fill="#97b4c3" font-size="20" font-family="Arial">B</text>
+  <text x="655" y="442" fill="#97b4c3" font-size="20" font-family="Arial">4s/6s</text>
+
+  <text x="860" y="442" fill="#97b4c3" font-size="20" font-family="Arial">Batter</text>
+  <text x="1280" y="442" fill="#97b4c3" font-size="20" font-family="Arial">R</text>
+  <text x="1350" y="442" fill="#97b4c3" font-size="20" font-family="Arial">B</text>
+  <text x="1415" y="442" fill="#97b4c3" font-size="20" font-family="Arial">4s/6s</text>
+
+  <g fill="#eef7ff" font-family="Arial" font-size="24">
+    <text x="100" y="492">Ruturaj Gaikwad</text><text x="520" y="492">55</text><text x="590" y="492">38</text><text x="655" y="492">6/2</text>
+    <text x="100" y="542">Ajinkya Rahane</text><text x="520" y="542">23</text><text x="590" y="542">18</text><text x="655" y="542">3/0</text>
+    <text x="100" y="592">Shivam Dube</text><text x="520" y="592">34</text><text x="590" y="592">21</text><text x="655" y="592">2/2</text>
+    <text x="100" y="642">Ravindra Jadeja</text><text x="520" y="642">18</text><text x="590" y="642">14</text><text x="655" y="642">1/0</text>
+    <text x="100" y="692">MS Dhoni</text><text x="520" y="692">12</text><text x="590" y="692">7</text><text x="655" y="692">1/1</text>
+    <text x="100" y="742">Extras</text><text x="520" y="742">25</text><text x="655" y="742">wd 11, lb 8, b 6</text>
+  </g>
+
+  <g fill="#eef7ff" font-family="Arial" font-size="24">
+    <text x="860" y="492">Virat Kohli</text><text x="1280" y="492">72</text><text x="1350" y="492">48</text><text x="1415" y="492">8/2</text>
+    <text x="860" y="542">Faf du Plessis</text><text x="1280" y="542">38</text><text x="1350" y="542">24</text><text x="1415" y="542">5/1</text>
+    <text x="860" y="592">Rajat Patidar</text><text x="1280" y="592">27</text><text x="1350" y="592">16</text><text x="1415" y="592">2/2</text>
+    <text x="860" y="642">Dinesh Karthik</text><text x="1280" y="642">17</text><text x="1350" y="642">10</text><text x="1415" y="642">2/1</text>
+    <text x="860" y="692">Extras</text><text x="1280" y="692">14</text><text x="1415" y="692">wd 8, lb 6</text>
+  </g>
+
+  <text x="100" y="805" fill="#97b4c3" font-size="22" font-family="Arial">Best bowling RCB: Yash Dayal 4-0-30-3</text>
+  <text x="860" y="805" fill="#97b4c3" font-size="22" font-family="Arial">Best bowling CSK: Jadeja 4-0-27-1</text>
+</svg>

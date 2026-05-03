@@ -1,0 +1,202 @@
+{
+  "exportedAt": "2026-05-03T12:00:00.000Z",
+  "league": {
+    "teams": [
+      {
+        "id": "team-1",
+        "name": "Mumbai Indians",
+        "color": "#f7c948",
+        "squad": [
+          "Rohit Sharma",
+          "Ishan Kishan",
+          "Suryakumar Yadav",
+          "Tilak Varma",
+          "Hardik Pandya",
+          "Tim David",
+          "Romario Shepherd",
+          "Jasprit Bumrah",
+          "Gerald Coetzee",
+          "Piyush Chawla",
+          "Akash Madhwal"
+        ]
+      },
+      {
+        "id": "team-2",
+        "name": "Chennai Super Kings",
+        "color": "#56b6ff",
+        "squad": [
+          "Ruturaj Gaikwad",
+          "Rachin Ravindra",
+          "Ajinkya Rahane",
+          "Daryl Mitchell",
+          "Shivam Dube",
+          "Ravindra Jadeja",
+          "MS Dhoni",
+          "Deepak Chahar",
+          "Tushar Deshpande",
+          "Maheesh Theekshana",
+          "Matheesha Pathirana"
+        ]
+      },
+      {
+        "id": "team-3",
+        "name": "Royal Challengers Bengaluru",
+        "color": "#3ddc97",
+        "squad": [
+          "Virat Kohli",
+          "Faf du Plessis",
+          "Rajat Patidar",
+          "Glenn Maxwell",
+          "Cameron Green",
+          "Dinesh Karthik",
+          "Mahipal Lomror",
+          "Mohammed Siraj",
+          "Yash Dayal",
+          "Reece Topley",
+          "Karn Sharma"
+        ]
+      },
+      {
+        "id": "team-4",
+        "name": "Kolkata Knight Riders",
+        "color": "#ff8c42",
+        "squad": [
+          "Phil Salt",
+          "Sunil Narine",
+          "Venkatesh Iyer",
+          "Shreyas Iyer",
+          "Rinku Singh",
+          "Andre Russell",
+          "Ramandeep Singh",
+          "Mitchell Starc",
+          "Harshit Rana",
+          "Varun Chakravarthy",
+          "Vaibhav Arora"
+        ]
+      }
+    ],
+    "fixtures": [
+      {
+        "id": "sample-match-1",
+        "matchNo": 1,
+        "round": 1,
+        "teamAId": "team-1",
+        "teamBId": "team-2",
+        "result": {
+          "teamA": { "runs": 182, "wickets": 6, "overs": "20" },
+          "teamB": { "runs": 176, "wickets": 8, "overs": "20" },
+          "date": "2026-05-01",
+          "note": "Mumbai Indians won by 6 runs",
+          "screenshot": "",
+          "outcome": "completed",
+          "winnerId": "team-1"
+        }
+      },
+      {
+        "id": "sample-match-2",
+        "matchNo": 2,
+        "round": 2,
+        "teamAId": "team-3",
+        "teamBId": "team-4",
+        "result": {
+          "teamA": { "runs": 198, "wickets": 7, "overs": "20" },
+          "teamB": { "runs": 201, "wickets": 5, "overs": "19.4" },
+          "date": "2026-05-02",
+          "note": "Kolkata Knight Riders won by 5 wickets",
+          "screenshot": "",
+          "outcome": "completed",
+          "winnerId": "team-4"
+        }
+      },
+      {
+        "id": "sample-match-3",
+        "matchNo": 3,
+        "round": 3,
+        "teamAId": "team-2",
+        "teamBId": "team-3",
+        "result": {
+          "teamA": { "runs": 167, "wickets": 9, "overs": "20" },
+          "teamB": { "runs": 168, "wickets": 4, "overs": "18.2" },
+          "date": "2026-05-03",
+          "note": "Royal Challengers Bengaluru won by 6 wickets",
+          "screenshot": "",
+          "outcome": "completed",
+          "winnerId": "team-3"
+        }
+      },
+      {
+        "id": "sample-match-4",
+        "matchNo": 4,
+        "round": 4,
+        "teamAId": "team-1",
+        "teamBId": "team-4",
+        "result": null
+      },
+      {
+        "id": "sample-match-5",
+        "matchNo": 5,
+        "round": 5,
+        "teamAId": "team-2",
+        "teamBId": "team-4",
+        "result": null
+      },
+      {
+        "id": "sample-match-6",
+        "matchNo": 6,
+        "round": 6,
+        "teamAId": "team-1",
+        "teamBId": "team-3",
+        "result": null
+      },
+      {
+        "id": "sample-match-7",
+        "matchNo": 7,
+        "round": 7,
+        "teamAId": "team-2",
+        "teamBId": "team-1",
+        "result": null
+      },
+      {
+        "id": "sample-match-8",
+        "matchNo": 8,
+        "round": 8,
+        "teamAId": "team-4",
+        "teamBId": "team-3",
+        "result": null
+      },
+      {
+        "id": "sample-match-9",
+        "matchNo": 9,
+        "round": 9,
+        "teamAId": "team-3",
+        "teamBId": "team-2",
+        "result": null
+      },
+      {
+        "id": "sample-match-10",
+        "matchNo": 10,
+        "round": 10,
+        "teamAId": "team-4",
+        "teamBId": "team-1",
+        "result": null
+      },
+      {
+        "id": "sample-match-11",
+        "matchNo": 11,
+        "round": 11,
+        "teamAId": "team-4",
+        "teamBId": "team-2",
+        "result": null
+      },
+      {
+        "id": "sample-match-12",
+        "matchNo": 12,
+        "round": 12,
+        "teamAId": "team-3",
+        "teamBId": "team-1",
+        "result": null
+      }
+    ],
+    "currentMatchId": null
+  }
+}

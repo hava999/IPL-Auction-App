@@ -1,0 +1,1698 @@
+<!DOCTYPE html><script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Ipl Auction App",
+  "schemaVersion": 1,
+  "description": "IPL 2025/26 Auction v2 — live chat, pause requests, player stats links, watchlist, bid history, emoji reactions, sound effects, player profile cards, improved UI."
+}
+</script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>IPL 2025 Live Auction</title>
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<style>
+:root{color-scheme:dark;--g:#FFD700;--o:#FF6B00;--gr:#00C851;--rd:#FF3B30;--bg:#08081a;--c1:rgba(255,255,255,.05);--b1:rgba(255,255,255,.1);--b2:rgba(255,255,255,.15)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.on{display:flex}
+
+/* ── LANDING ── */
+#pg-land{align-items:center;justify-content:center;padding:20px;background:linear-gradient(150deg,#08081a,#120a2a);overflow-y:auto}
+.logo{font-size:2.6rem;font-weight:900;background:linear-gradient(90deg,var(--g),var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-align:center;margin-bottom:4px;margin-top:12px}
+.logo-sub{color:#666;text-align:center;font-size:.85rem;margin-bottom:24px}
+.card{background:var(--c1);border:1px solid rgba(255,215,0,.2);border-radius:18px;padding:26px;width:100%;max-width:440px;margin-bottom:16px}
+.card h2{color:var(--g);font-size:1.05rem;margin-bottom:16px}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:.7rem;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.f input,.f select{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--b1);border-radius:9px;color:#fff;padding:10px 13px;font-size:.92rem;outline:none;transition:border-color .2s}
+.f input:focus,.f select:focus{border-color:var(--g)}
+.f select option{background:#1a1a3a}
+.big-code{font-size:1.6rem!important;font-weight:900!important;letter-spacing:8px!important;text-align:center!important;border-color:rgba(255,215,0,.35)!important;color:var(--g)!important;text-transform:uppercase}
+.btn{width:100%;padding:13px;border-radius:11px;border:none;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-g{background:linear-gradient(135deg,var(--g),var(--o));color:#000}
+.btn-g:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,215,0,.3)}
+.btn-g:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-o{background:transparent;border:1px solid var(--b1);color:#aaa;margin-top:8px}
+.btn-o:hover{background:rgba(255,255,255,.07)}
+.divider{display:flex;align-items:center;gap:10px;color:#444;font-size:.78rem;margin:20px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--b1)}
+.info-box{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.15);border-radius:11px;padding:13px;font-size:.78rem;color:#aaa;line-height:1.7;margin-bottom:14px}
+.info-box strong{color:var(--g)}
+.connecting-msg{text-align:center;color:#888;font-size:.85rem;padding:12px;display:none}
+.connecting-msg.show{display:block}
+.spin{display:inline-block;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOBBY ── */
+#pg-lobby{background:var(--bg)}
+.topbar{background:rgba(0,0,0,.5);border-bottom:1px solid var(--b1);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-title{font-weight:700;color:var(--g);font-size:.95rem}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gr);display:inline-block;margin-right:5px;animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.lob-body{flex:1;padding:18px;max-width:640px;margin:0 auto;width:100%;overflow-y:auto}
+.code-box{background:rgba(255,215,0,.06);border:2px dashed rgba(255,215,0,.3);border-radius:14px;padding:16px;text-align:center;margin-bottom:18px;cursor:pointer;transition:background .2s}
+.code-box:hover{background:rgba(255,215,0,.1)}
+.code-lbl{font-size:.65rem;color:#888;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.code-big{font-size:2.8rem;font-weight:900;color:var(--g);letter-spacing:10px;line-height:1}
+.code-hint{font-size:.72rem;color:#666;margin-top:5px}
+.copy-hint{font-size:.68rem;color:rgba(255,215,0,.5);margin-top:3px}
+.teams-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:9px;margin-bottom:16px}
+.tslot{background:var(--c1);border:1px solid var(--b1);border-radius:11px;padding:12px;text-align:center;transition:all .3s}
+.tslot.filled{border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.04)}
+.tslot.empty{border-style:dashed;opacity:.4}
+.ts-ic{width:34px;height:34px;border-radius:8px;margin:0 auto 7px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;color:#000}
+.ts-n{font-weight:700;font-size:.83rem}
+.ts-o{font-size:.68rem;color:#888;margin-top:2px}
+.rules{background:rgba(255,215,0,.04);border:1px solid rgba(255,215,0,.12);border-radius:11px;padding:13px;font-size:.78rem;color:#aaa;line-height:1.8;margin-bottom:16px}
+.rules strong{color:var(--g)}
+.lob-foot{padding:13px 18px;background:rgba(0,0,0,.4);border-top:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.wait-msg{font-size:.8rem;color:#888}
+.btn-start{padding:12px 28px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--g),var(--o));color:#000;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .2s}
+.btn-start:disabled{opacity:.3;cursor:not-allowed}
+.btn-start:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(255,215,0,.3)}
+
+/* ── HOST SCREEN ── */
+#pg-host{overflow:hidden}
+.hgrid{display:grid;grid-template-columns:230px 1fr 230px;grid-template-rows:52px 1fr;height:100vh}
+.hdr{grid-column:1/-1;background:rgba(0,0,0,.7);border-bottom:2px solid rgba(255,215,0,.2);display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;overflow:hidden}
+.hdr-logo{font-size:1rem;font-weight:900;background:linear-gradient(90deg,var(--g),var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap}
+.hdr-stats{display:flex;gap:10px}
+.hs{text-align:center;min-width:36px}
+.hs-v{font-size:.9rem;font-weight:700;color:var(--g)}
+.hs-l{font-size:.55rem;color:#555;text-transform:uppercase;letter-spacing:1px}
+.hdr-room{font-size:.7rem;color:#666}
+.hdr-room strong{color:var(--g);letter-spacing:2px}
+.hdr-conn{font-size:.7rem;color:#888}
+.hdr-conn span{color:var(--gr);font-weight:700}
+.hdr-btn{background:rgba(255,255,255,.07);border:1px solid var(--b1);color:#aaa;padding:5px 10px;border-radius:7px;cursor:pointer;font-size:.7rem;font-weight:600;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.hdr-btn:hover{background:rgba(255,255,255,.14)}
+.hdr-btn.danger{border-color:rgba(255,59,48,.4);color:#ff8888}
+.hdr-pause{background:rgba(255,165,0,.12);border-color:rgba(255,165,0,.4);color:#ffa500}
+.hdr-pause.paused{background:rgba(0,200,81,.12);border-color:rgba(0,200,81,.4);color:var(--gr)}
+.hdr-chat-btn{position:relative}
+.chat-badge{position:absolute;top:-4px;right:-4px;background:var(--rd);color:#fff;font-size:.55rem;font-weight:900;border-radius:50%;width:14px;height:14px;display:none;align-items:center;justify-content:center}
+.chat-badge.show{display:flex}
+.side{overflow-y:auto;padding:10px}
+.side.left{background:rgba(0,0,0,.3);border-right:1px solid var(--b1)}
+.side.right{background:rgba(0,0,0,.3);border-left:1px solid var(--b1)}
+.pl{font-size:.58rem;text-transform:uppercase;letter-spacing:2px;color:#444;margin-bottom:7px;padding:0 1px}
+.tc{background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:9px;padding:9px 10px;margin-bottom:6px;transition:all .2s}
+.tc.lead{border-color:var(--g);background:rgba(255,215,0,.06)}
+.tc.warn{border-color:rgba(255,165,0,.5);background:rgba(255,165,0,.04)}
+.tc-h{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.tc-ic{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.65rem;color:#000;flex-shrink:0}
+.tc-n{font-weight:700;font-size:.77rem}
+.tc-o{font-size:.58rem;color:#777}
+.tc-p{font-size:.88rem;font-weight:700}
+.tc-i{font-size:.58rem;color:#666;margin-top:2px}
+.tc-rules{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}
+.tag{font-size:.54rem;padding:1px 5px;border-radius:4px;font-weight:700}
+.tag-ok{background:rgba(0,200,81,.15);color:#00C851}
+.tag-warn{background:rgba(255,165,0,.2);color:#ffa500}
+.tag-err{background:rgba(255,59,48,.2);color:#ff6b6b}
+.pb{height:3px;border-radius:3px;background:rgba(255,255,255,.07);margin-top:5px}
+.pb-f{height:100%;border-radius:3px;transition:width .6s}
+.qi{display:flex;justify-content:space-between;align-items:center;padding:5px 7px;border-radius:6px;font-size:.7rem;background:rgba(255,255,255,.03);margin-bottom:3px}
+.qi.cur{background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2)}
+.qi.clickable{cursor:pointer}
+.qi.clickable:hover{background:rgba(255,255,255,.09)}
+.qi-n{font-weight:600}
+.qi-r{color:#666;font-size:.6rem}
+.qi-p{color:var(--g);font-weight:600;font-size:.65rem}
+.le{background:rgba(255,255,255,.03);border-left:3px solid var(--g);border-radius:0 6px 6px 0;padding:6px 9px;margin-bottom:4px}
+.le.un{border-left-color:#ff4444}
+.le.skipped{border-left-color:#ff8800}
+.le-n{font-weight:700;font-size:.75rem}
+.le-t{font-size:.68rem;margin-top:1px}
+.le-p{font-size:.62rem;color:#aaa}
+.hcen{display:flex;flex-direction:column;padding:11px;gap:8px;overflow-y:auto;background:#07071a}
+.stage{background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(255,107,0,.03));border:1px solid rgba(255,215,0,.18);border-radius:16px;padding:15px;text-align:center;flex-shrink:0;position:relative;overflow:hidden}
+.stage::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,215,0,.08),transparent 60%);pointer-events:none}
+.st-lot{font-size:.65rem;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px}
+.st-name{font-size:1.7rem;font-weight:900;line-height:1.1;margin-bottom:5px}
+.st-role{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.7rem;font-weight:700;margin-bottom:10px}
+.st-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.st-item{background:rgba(255,255,255,.04);border-radius:7px;padding:6px}
+.st-v{font-size:.78rem;font-weight:700;color:var(--g)}
+.st-l{font-size:.56rem;color:#666;margin-top:1px}
+.st-stats-link{display:inline-flex;align-items:center;gap:4px;margin-top:8px;font-size:.68rem;color:rgba(255,215,0,.6);text-decoration:none;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:6px;padding:3px 9px;transition:all .2s}
+.st-stats-link:hover{color:var(--g);background:rgba(255,215,0,.12)}
+.bid-row{display:flex;gap:8px;align-items:stretch;flex-shrink:0}
+.timer-w{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;flex-shrink:0}
+.t-ring{position:relative;width:76px;height:76px}
+.t-svg{transform:rotate(-90deg)}
+.t-bg{fill:none;stroke:rgba(255,255,255,.07);stroke-width:7}
+.t-fg{fill:none;stroke-width:7;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
+.t-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900}
+.t-lbl{font-size:.55rem;color:#666;text-transform:uppercase;letter-spacing:1px}
+.bid-box{flex:1;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);border-radius:12px;padding:11px;text-align:center}
+.bb-lbl{font-size:.6rem;color:#777;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.bb-amt{font-size:2rem;font-weight:900;color:var(--g);line-height:1}
+.bb-who{font-size:.76rem;color:#aaa;margin-top:3px}
+.bb-nxt{font-size:.65rem;color:#555;margin-top:2px}
+.hctrl{background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:12px;padding:10px;flex-shrink:0}
+.hctrl-t{font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.hctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px}
+.hb{padding:10px 7px;border-radius:9px;border:none;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s}
+.hb-sold{background:linear-gradient(135deg,var(--gr),#007e33);color:#fff}
+.hb-sold:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,200,81,.3)}
+.hb-sold:disabled{opacity:.3;cursor:not-allowed}
+.hb-un{background:rgba(255,50,50,.15);border:1px solid rgba(255,50,50,.3);color:#ff8888}
+.hb-un:hover{background:rgba(255,50,50,.25)}
+.hb-skip{background:rgba(255,255,255,.04);border:1px solid var(--b1);color:#888;padding:8px;border-radius:9px;cursor:pointer;font-size:.73rem;font-weight:600;width:100%;margin-bottom:6px}
+.hb-skip:hover{background:rgba(255,255,255,.08)}
+.hctrl-row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.hb-ovr{background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);color:#ffa500;font-size:.73rem;padding:8px 5px;border-radius:9px;cursor:pointer;font-weight:700}
+.hb-ovr:hover{background:rgba(255,165,0,.2)}
+.hb-relist{background:rgba(100,100,255,.1);border:1px solid rgba(100,100,255,.3);color:#99aaff;font-size:.73rem;padding:8px 5px;border-radius:9px;cursor:pointer;font-weight:700}
+.hb-relist:hover{background:rgba(100,100,255,.2)}
+.hb-relist:disabled{opacity:.3;cursor:not-allowed}
+.pause-banner{background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.3);border-radius:8px;padding:7px 12px;text-align:center;font-size:.78rem;color:#ffa500;font-weight:700;display:none}
+.pause-banner.show{display:block}
+/* Pause request notification */
+.pause-req-banner{background:rgba(255,100,0,.12);border:1px solid rgba(255,100,0,.4);border-radius:8px;padding:7px 12px;display:none;align-items:center;justify-content:space-between;font-size:.75rem}
+.pause-req-banner.show{display:flex}
+.pause-req-text{color:#ff9944;font-weight:700}
+.pause-req-btns{display:flex;gap:5px}
+.prb{padding:4px 9px;border-radius:6px;border:none;font-size:.7rem;font-weight:700;cursor:pointer}
+.prb-yes{background:var(--gr);color:#000}
+.prb-no{background:rgba(255,255,255,.1);color:#aaa}
+
+/* ── BIDDER SCREEN ── */
+#pg-bid{background:var(--bg)}
+.bid-wrap{display:flex;flex-direction:column;height:100vh;max-width:440px;margin:0 auto;width:100%}
+.bid-top{background:rgba(0,0,0,.55);border-bottom:1px solid var(--b1);padding:9px 13px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:6px}
+.bid-top-logo{font-size:.9rem;font-weight:900;background:linear-gradient(90deg,var(--g),var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;flex-shrink:0}
+.bid-top-team{font-size:.7rem;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;text-align:center}
+.bid-top-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.bid-top-purse{font-size:.8rem;font-weight:700;color:var(--g)}
+.bid-pause-req-btn{background:rgba(255,165,0,.15);border:1px solid rgba(255,165,0,.4);color:#ffa500;padding:4px 9px;border-radius:7px;font-size:.68rem;font-weight:700;cursor:pointer}
+.bid-pause-req-btn:active{opacity:.7}
+.bid-pause-req-btn.sent{background:rgba(255,255,255,.05);border-color:var(--b1);color:#666}
+.bid-tabs{display:flex;background:rgba(0,0,0,.4);border-bottom:1px solid var(--b1);flex-shrink:0}
+.bid-tab{flex:1;padding:8px 4px;text-align:center;font-size:.68rem;font-weight:600;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;position:relative}
+.bid-tab.active{color:var(--g);border-bottom-color:var(--g)}
+.bid-tab-badge{position:absolute;top:3px;right:6px;background:var(--rd);color:#fff;font-size:.52rem;font-weight:900;border-radius:50%;width:13px;height:13px;display:none;align-items:center;justify-content:center}
+.bid-tab-badge.show{display:flex}
+.tab-pane{display:none;flex:1;overflow-y:auto}
+.tab-pane.active{display:flex;flex-direction:column}
+.bid-player{flex-shrink:0;background:linear-gradient(135deg,rgba(255,215,0,.05),rgba(255,107,0,.03));border-bottom:1px solid rgba(255,215,0,.12);padding:12px;text-align:center}
+.bid-lot{font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:2px;margin-bottom:2px}
+.bid-pn{font-size:1.5rem;font-weight:900;line-height:1.1;margin-bottom:4px}
+.bid-pr{display:inline-block;padding:3px 11px;border-radius:20px;font-size:.7rem;font-weight:700;margin-bottom:8px}
+.bid-pmeta{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.bpm{background:rgba(255,255,255,.05);border-radius:7px;padding:6px 4px}
+.bpm-v{font-size:.74rem;font-weight:700;color:var(--g)}
+.bpm-l{font-size:.54rem;color:#666;margin-top:1px}
+.bid-stats-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.bid-stats-link{display:inline-flex;align-items:center;gap:3px;font-size:.66rem;color:rgba(255,215,0,.6);text-decoration:none;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.15);border-radius:6px;padding:3px 9px;transition:all .2s}
+.bid-stats-link:hover,.bid-stats-link:active{color:var(--g);background:rgba(255,215,0,.12)}
+.bid-watchlist-btn{background:rgba(255,255,255,.05);border:1px solid var(--b1);color:#888;border-radius:6px;padding:3px 9px;font-size:.66rem;cursor:pointer;transition:all .2s}
+.bid-watchlist-btn.starred{background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.4);color:var(--g)}
+.bid-live{flex-shrink:0;padding:10px 13px;display:flex;gap:8px;align-items:center}
+.bid-t-ring{position:relative;width:62px;height:62px;flex-shrink:0}
+.bid-cur{flex:1;background:rgba(255,215,0,.06);border:1px solid rgba(255,215,0,.18);border-radius:11px;padding:10px;text-align:center}
+.bc-lbl{font-size:.6rem;color:#777;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px}
+.bc-amt{font-size:1.75rem;font-weight:900;color:var(--g);line-height:1}
+.bc-who{font-size:.72rem;color:#aaa;margin-top:2px}
+.bc-nxt{font-size:.63rem;color:#555;margin-top:1px}
+.bid-pause-msg{background:rgba(255,165,0,.08);border:1px solid rgba(255,165,0,.3);padding:8px;text-align:center;font-size:.76rem;color:#ffa500;font-weight:700;flex-shrink:0;display:none}
+.bid-pause-msg.show{display:block}
+.bid-teams-scroll{flex-shrink:0;padding:0 13px 8px;display:flex;gap:7px;overflow-x:auto}
+.bmt{background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:9px;padding:7px 9px;flex-shrink:0;text-align:center;min-width:85px;transition:all .2s}
+.bmt.lead{border-color:var(--g);background:rgba(255,215,0,.07)}
+.bmt.me{border-color:rgba(255,255,255,.2)}
+.bmt-n{font-size:.67rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}
+.bmt-p{font-size:.58rem;color:#777;margin-top:1px}
+.bmt-b{font-size:.54rem;color:var(--g);font-weight:600;margin-top:2px}
+.bid-action{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 13px;gap:7px}
+.big-btn{width:100%;max-width:320px;padding:18px;border-radius:18px;border:none;font-size:1.2rem;font-weight:900;cursor:pointer;transition:all .15s;background:linear-gradient(135deg,var(--g),var(--o));color:#000;box-shadow:0 8px 28px rgba(255,215,0,.25)}
+.big-btn:active:not(:disabled){transform:scale(.96)}
+.big-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.big-btn.lead-btn{background:linear-gradient(135deg,var(--gr),#007e33);color:#fff;box-shadow:0 8px 28px rgba(0,200,81,.2)}
+.bid-sub{font-size:.76rem;color:#777;text-align:center}
+.bid-sub.yl{color:var(--gr);font-weight:600}
+.bid-sub.warn{color:#ffa500;font-weight:600}
+.conn-status{font-size:.68rem;text-align:center;color:#555;margin-top:2px}
+.conn-status.ok{color:var(--gr)}
+.conn-status.bad{color:var(--rd)}
+/* Restriction bar */
+.restrict-bar{flex-shrink:0;padding:7px 13px;display:flex;gap:5px;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.05);background:rgba(0,0,0,.3)}
+.rb-item{font-size:.6rem;padding:3px 7px;border-radius:20px;font-weight:700}
+.rb-ok{background:rgba(0,200,81,.1);color:#00C851;border:1px solid rgba(0,200,81,.2)}
+.rb-warn{background:rgba(255,165,0,.12);color:#ffa500;border:1px solid rgba(255,165,0,.25)}
+.rb-err{background:rgba(255,59,48,.12);color:#ff6b6b;border:1px solid rgba(255,59,48,.25)}
+/* Squads tab */
+.squad-card{background:var(--c1);border:1px solid var(--b1);border-radius:11px;margin:10px;overflow:hidden}
+.squad-hdr{padding:10px 12px;display:flex;align-items:center;gap:8px}
+.squad-ic{width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.65rem;color:#000;flex-shrink:0}
+.squad-n{font-size:.88rem;font-weight:700}
+.squad-m{font-size:.63rem;color:#777;margin-top:1px}
+.squad-players{padding:0 10px 10px}
+.sp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.sp-row:last-child{border:none}
+.sp-n{font-size:.78rem;font-weight:600}
+.sp-r{font-size:.62rem;color:#666}
+.sp-p{font-size:.78rem;font-weight:700;color:var(--g)}
+.squad-rules-bar{padding:7px 10px;background:rgba(255,255,255,.02);display:flex;gap:5px;flex-wrap:wrap}
+/* Unsold tab */
+.unsold-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ui-n{font-size:.82rem;font-weight:600}
+.ui-r{font-size:.63rem;color:#666;margin-top:1px}
+.ui-s{font-size:.68rem;padding:2px 7px;border-radius:5px;font-weight:700}
+.ui-s.unsold{background:rgba(255,59,48,.12);color:#ff6b6b}
+.ui-s.skipped{background:rgba(255,136,0,.12);color:#ff8800}
+/* Purse tab */
+.purse-row{padding:10px 13px;border-bottom:1px solid rgba(255,255,255,.04);display:flex;align-items:center;gap:10px}
+.purse-ic{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.65rem;color:#000;flex-shrink:0}
+.purse-info{flex:1}
+.purse-name{font-size:.8rem;font-weight:700}
+.purse-meta{font-size:.62rem;color:#777;margin-top:1px}
+.purse-amt{font-size:.95rem;font-weight:800}
+.purse-bar-bg{height:4px;border-radius:4px;background:rgba(255,255,255,.06);margin-top:5px}
+.purse-bar-fg{height:100%;border-radius:4px;transition:width .5s}
+
+/* ── CHAT ── */
+.chat-panel{position:fixed;right:0;top:52px;bottom:0;width:280px;background:#0b0b22;border-left:1px solid rgba(255,215,0,.15);display:flex;flex-direction:column;z-index:500;transform:translateX(100%);transition:transform .25s}
+.chat-panel.open{transform:translateX(0)}
+.chat-hdr{padding:10px 13px;background:rgba(0,0,0,.4);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.chat-hdr-t{font-size:.82rem;font-weight:700;color:var(--g)}
+.chat-close{background:none;border:none;color:#666;font-size:1.1rem;cursor:pointer}
+.chat-close:hover{color:#fff}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px}
+.chat-msg{margin-bottom:8px;animation:msgIn .2s}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg-hdr{display:flex;align-items:baseline;gap:5px;margin-bottom:2px}
+.chat-msg-name{font-size:.68rem;font-weight:700}
+.chat-msg-time{font-size:.58rem;color:#444}
+.chat-msg-body{font-size:.78rem;color:#ccc;line-height:1.4;word-break:break-word;background:rgba(255,255,255,.04);border-radius:0 8px 8px 8px;padding:5px 8px}
+.chat-msg.system .chat-msg-body{background:rgba(255,215,0,.05);color:#888;font-style:italic;font-size:.72rem;border-radius:8px}
+.chat-msg.mine .chat-msg-body{background:rgba(255,215,0,.08);border-radius:8px 0 8px 8px}
+.chat-emoji-row{display:flex;gap:5px;padding:6px 10px;border-top:1px solid var(--b1);flex-shrink:0;background:rgba(0,0,0,.3)}
+.chat-emoji-btn{background:none;border:none;font-size:1.15rem;cursor:pointer;padding:3px;border-radius:5px;transition:transform .15s}
+.chat-emoji-btn:hover{transform:scale(1.3)}
+.chat-input-row{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--b1);flex-shrink:0;background:rgba(0,0,0,.2)}
+.chat-input{flex:1;background:rgba(255,255,255,.07);border:1px solid var(--b1);border-radius:8px;color:#fff;padding:7px 10px;font-size:.8rem;outline:none}
+.chat-input:focus{border-color:var(--g)}
+.chat-send{background:linear-gradient(135deg,var(--g),var(--o));border:none;color:#000;border-radius:8px;padding:7px 12px;font-size:.78rem;font-weight:700;cursor:pointer}
+
+/* Bidder chat (floating button + panel) */
+.bchat-fab{position:fixed;bottom:90px;right:16px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--o));border:none;color:#000;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(255,215,0,.3);z-index:400;transition:transform .15s}
+.bchat-fab:active{transform:scale(.9)}
+.bchat-badge{position:absolute;top:-2px;right:-2px;background:var(--rd);color:#fff;font-size:.55rem;font-weight:900;border-radius:50%;width:16px;height:16px;display:none;align-items:center;justify-content:center}
+.bchat-badge.show{display:flex}
+.bchat-panel{position:fixed;bottom:0;left:0;right:0;height:55vh;max-width:440px;margin:0 auto;background:#0c0c24;border-top:1px solid rgba(255,215,0,.2);border-radius:18px 18px 0 0;display:flex;flex-direction:column;z-index:600;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+.bchat-panel.open{transform:translateY(0)}
+.bchat-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--b1)}
+.bchat-drag{width:36px;height:4px;background:rgba(255,255,255,.15);border-radius:4px;margin:0 auto 10px}
+
+/* ── BID HISTORY PANEL (host right side) ── */
+.hist-item{background:rgba(255,215,0,.04);border-left:2px solid rgba(255,215,0,.3);border-radius:0 5px 5px 0;padding:4px 7px;margin-bottom:3px;font-size:.68rem}
+.hist-team{font-weight:700}
+.hist-amt{color:var(--g);font-weight:700}
+.hist-time{color:#444;font-size:.58rem}
+
+/* ── WATCHLIST tab ── */
+.watch-item{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.watch-star{background:none;border:none;font-size:1rem;cursor:pointer;padding:2px 5px}
+
+/* ── RESULTS ── */
+#pg-res{background:var(--bg);padding:26px 18px;overflow-y:auto;min-height:100vh}
+.res-title{font-size:1.9rem;font-weight:900;text-align:center;background:linear-gradient(90deg,var(--g),var(--o));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px}
+.res-sub{text-align:center;color:#666;font-size:.8rem;margin-bottom:26px}
+.res-export-row{display:flex;justify-content:center;gap:10px;margin-bottom:18px}
+.res-export-btn{background:rgba(255,255,255,.06);border:1px solid var(--b1);color:#aaa;padding:8px 18px;border-radius:9px;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .2s}
+.res-export-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;max-width:1100px;margin:0 auto 24px}
+.rc{background:var(--c1);border:1px solid var(--b1);border-radius:13px;overflow:hidden}
+.rc-hdr{padding:12px 15px;display:flex;align-items:center;gap:9px}
+.rc-ic{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;font-size:.8rem}
+.rc-n{font-size:1rem;font-weight:700}
+.rc-m{font-size:.7rem;color:#777;margin-top:1px}
+.rc-players{padding:0 13px 12px}
+.rp{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.rp:last-child{border:none}
+.rp-n{font-size:.83rem;font-weight:600}
+.rp-r{font-size:.65rem;color:#666}
+.rp-p{font-size:.83rem;font-weight:700;color:var(--g)}
+.rc-foot{padding:9px 13px;background:rgba(255,255,255,.02);border-top:1px solid rgba(255,255,255,.05);font-size:.78rem;color:#777}
+.rc-foot span{color:var(--gr);font-weight:700}
+.rc-rules-summary{padding:8px 13px;background:rgba(255,215,0,.03);border-top:1px solid rgba(255,255,255,.04);display:flex;gap:5px;flex-wrap:wrap}
+.back-btn{display:block;margin:0 auto;background:transparent;border:1px solid var(--b1);color:#aaa;padding:11px 26px;border-radius:11px;cursor:pointer;font-size:.88rem;font-weight:600}
+
+/* ── Roles ── */
+.r-BAT{background:rgba(255,152,0,.2);color:#FFA726}
+.r-BOWL{background:rgba(244,67,54,.2);color:#EF5350}
+.r-AR{background:rgba(76,175,80,.2);color:#66BB6A}
+.r-WK{background:rgba(33,150,243,.2);color:#42A5F5}
+
+/* ── Overlay ── */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.93);display:flex;align-items:center;justify-content:center;z-index:999;animation:fi .25s}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.ov-c{text-align:center;animation:pi .4s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes pi{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.ov-sold{font-size:4.5rem;font-weight:900;color:var(--g);line-height:1;text-shadow:0 0 50px rgba(255,215,0,.5)}
+.ov-un{font-size:3rem;font-weight:900;color:var(--rd)}
+.ov-name{font-size:1.7rem;font-weight:700;margin-top:6px}
+.ov-to{font-size:.95rem;color:#aaa;margin-top:3px}
+.ov-price{font-size:2.5rem;font-weight:900;color:var(--gr);margin-top:5px}
+.ov-reactions{display:flex;gap:10px;justify-content:center;margin-top:12px;font-size:1.8rem}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#0f0f28;border:1px solid rgba(255,215,0,.25);border-radius:16px;padding:22px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal h3{color:var(--g);margin-bottom:14px;font-size:1rem}
+.modal-close{float:right;background:none;border:none;color:#777;font-size:1.2rem;cursor:pointer;margin-top:-4px}
+.modal-close:hover{color:#fff}
+.modal .f input{margin-bottom:10px}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.modal-btns .btn{padding:10px}
+.pick-list{max-height:400px;overflow-y:auto}
+.pick-item{display:flex;justify-content:space-between;align-items:center;padding:9px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent;transition:all .15s;margin-bottom:3px}
+.pick-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1)}
+.pick-item.unsold-p{opacity:.5}
+.pick-left{flex:1}
+.pick-n{font-size:.85rem;font-weight:600}
+.pick-m{font-size:.63rem;color:#777;margin-top:2px}
+.pick-p{font-size:.8rem;font-weight:700;color:var(--g);flex-shrink:0}
+.pick-search{width:100%;background:rgba(255,255,255,.07);border:1px solid var(--b1);border-radius:8px;color:#fff;padding:9px 12px;font-size:.88rem;outline:none;margin-bottom:10px}
+.pick-search::placeholder{color:#444}
+.pick-filter{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+.pf{font-size:.66rem;padding:4px 9px;border-radius:20px;cursor:pointer;border:1px solid var(--b1);color:#777;background:none;font-weight:600}
+.pf.active{border-color:var(--g);color:var(--g);background:rgba(255,215,0,.08)}
+
+/* ── Player Profile Modal ── */
+.profile-hero{text-align:center;padding:16px;background:linear-gradient(135deg,rgba(255,215,0,.06),rgba(255,107,0,.04));border-radius:10px;margin-bottom:14px}
+.profile-name{font-size:1.5rem;font-weight:900;margin-bottom:6px}
+.profile-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pm-item{background:rgba(255,255,255,.04);border-radius:8px;padding:8px;text-align:center}
+.pm-v{font-size:.85rem;font-weight:700;color:var(--g)}
+.pm-l{font-size:.58rem;color:#666;margin-top:1px}
+.profile-links{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.profile-link{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--b1);border-radius:9px;padding:10px 12px;text-decoration:none;color:#ccc;font-size:.82rem;transition:all .2s}
+.profile-link:hover{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.2)}
+.profile-link-icon{font-size:1.1rem}
+.profile-link-label{font-weight:600}
+.profile-link-sub{font-size:.65rem;color:#555;margin-top:1px}
+.profile-auction-hist{margin-top:12px}
+.pah-title{font-size:.68rem;color:#555;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.pah-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:.78rem}
+.pah-sold{color:var(--g);font-weight:700}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(12,12,30,.97);border:1px solid rgba(255,215,0,.3);color:#fff;padding:9px 18px;border-radius:9px;font-size:.83rem;z-index:2000;pointer-events:none;animation:ti .25s,to .25s 2.75s forwards;white-space:nowrap;max-width:90vw;text-align:center}
+@keyframes ti{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes to{to{opacity:0;transform:translateX(-50%) translateY(12px)}}
+
+/* ── Emoji Reaction Float ── */
+.emoji-float{position:fixed;font-size:2rem;pointer-events:none;z-index:1500;animation:efloat 2s forwards}
+@keyframes efloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-120px) scale(.5)}}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
+@media(max-width:700px){.hgrid{grid-template-columns:1fr}.side{display:none}.chat-panel{width:100%;top:0}}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="pg-land" class="screen on">
+  <div class="logo">🏏 IPL 2025 AUCTION</div>
+  <div class="logo-sub">Real-time multiplayer · Official rules · Cross-device</div>
+  <div class="card">
+    <h2>🎤 Host the Auction</h2>
+    <div class="info-box">Host is the <strong>auctioneer only</strong> — you control the auction, call SOLD/Unsold, manage the flow. You do <strong>not</strong> bid or have a team.<br>
+    <strong>Official rules enforced:</strong> ₹120Cr purse · Max 25 players · Max 8 overseas · Min 7 uncapped Indians</div>
+    <div class="f"><label>Number of Bidding Teams</label>
+      <select id="h-num">
+        <option value="2">2 Teams</option><option value="3">3 Teams</option><option value="4" selected>4 Teams</option>
+        <option value="5">5 Teams</option><option value="6">6 Teams</option><option value="8">8 Teams</option><option value="10">10 Teams</option>
+      </select>
+    </div>
+    <button class="btn btn-g" id="host-btn" onclick="doHost()">Create Room & Host 🚀</button>
+    <div class="connecting-msg" id="host-connecting"><span class="spin">⏳</span> Setting up room...</div>
+  </div>
+  <div class="card">
+    <h2>🏏 Join as Bidder</h2>
+    <div class="f"><label>Your Name</label><input id="j-name" placeholder="e.g. Rahul" maxlength="20"></div>
+    <div class="f"><label>Your Team Name</label><input id="j-team" placeholder="e.g. Chennai Super Kings" maxlength="28"></div>
+    <div class="f"><label>Room Code (from host)</label><input class="big-code" id="j-code" placeholder="ABC123" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>
+    <button class="btn btn-g" id="join-btn" onclick="doJoin()">Join Room →</button>
+    <div class="connecting-msg" id="join-connecting"><span class="spin">⏳</span> Connecting to host...</div>
+  </div>
+</div>
+
+<!-- LOBBY -->
+<div id="pg-lobby" class="screen">
+  <div class="topbar">
+    <div class="topbar-title"><span class="dot"></span><span id="lob-title">Room ------</span></div>
+    <div style="font-size:.75rem;color:#777"><span id="lob-conn-count">0</span> bidder(s) connected</div>
+    <button class="btn-o" style="width:auto;padding:7px 14px;font-size:.78rem;border-radius:9px;border:1px solid var(--b1);background:none;color:#888;cursor:pointer" onclick="location.reload()">Leave</button>
+  </div>
+  <div class="lob-body">
+    <div class="code-box" onclick="copyRoomCode()" title="Click to copy">
+      <div class="code-lbl">Share this code — friends enter it to join as bidders</div>
+      <div class="code-big" id="lob-code">------</div>
+      <div class="code-hint">Everyone opens this same page on their phone/laptop and enters the code above</div>
+      <div class="copy-hint">📋 Tap to copy</div>
+    </div>
+    <div class="teams-grid" id="lob-grid"></div>
+    <div class="rules">
+      <strong>📋 Official IPL Rules enforced:</strong><br>
+      💰 ₹120 Cr purse per team · Max 25 players · Min 18 players<br>
+      🌍 Max 8 overseas players · Min 7 uncapped Indian players<br>
+      ⏱ 30-sec timer resets on each new bid<br>
+      📈 Bid increments: ₹5L (under ₹1Cr) → ₹10L → ₹25L → ₹50L → ₹1Cr<br>
+      ⭐ Marquee players go first · Unsold players re-listed at end
+    </div>
+  </div>
+  <div class="lob-foot">
+    <div class="wait-msg" id="lob-msg">Waiting for bidders to join...</div>
+    <button class="btn-start" id="lob-start" onclick="doStart()" disabled>Start Auction 🏏</button>
+  </div>
+</div>
+
+<!-- HOST AUCTION SCREEN -->
+<div id="pg-host" class="screen">
+  <div class="hgrid">
+    <div class="hdr">
+      <div class="hdr-logo">🏏 HOST</div>
+      <div class="hdr-stats">
+        <div class="hs"><div class="hs-v" id="hs-sold">0</div><div class="hs-l">Sold</div></div>
+        <div class="hs"><div class="hs-v" id="hs-un">0</div><div class="hs-l">Unsold</div></div>
+        <div class="hs"><div class="hs-v" id="hs-rem">0</div><div class="hs-l">Left</div></div>
+        <div class="hs"><div class="hs-v" id="hs-sk">0</div><div class="hs-l">Skipped</div></div>
+      </div>
+      <div class="hdr-room">Room: <strong id="hdr-room">------</strong></div>
+      <div class="hdr-conn">Bidders: <span id="hdr-conn">0</span></div>
+      <button class="hdr-btn hdr-pause" id="pause-btn" onclick="togglePause()">⏸ Pause</button>
+      <button class="hdr-btn" onclick="openPickModal()">🔀 Pick Player</button>
+      <button class="hdr-btn hdr-chat-btn" id="h-chat-btn" onclick="toggleHostChat()">💬 Chat<span class="chat-badge" id="h-chat-badge">0</span></button>
+      <button class="hdr-btn" onclick="go('pg-res');renderRes()">📊 Results</button>
+      <button class="hdr-btn danger" onclick="if(confirm('End auction for all?')){G.phase=\'done\';broadcast();go(\'pg-res\');renderRes();}">🏁 End</button>
+    </div>
+    <div class="side left">
+      <div class="pl">Franchises</div>
+      <div id="h-teams"></div>
+    </div>
+    <div class="hcen">
+      <div class="pause-banner" id="h-pause-banner">⏸ AUCTION PAUSED — Timer frozen</div>
+      <div class="pause-req-banner" id="h-pause-req">
+        <div class="pause-req-text" id="h-pause-req-text">⏸ Pause requested by —</div>
+        <div class="pause-req-btns">
+          <button class="prb prb-yes" onclick="acceptPauseReq()">Accept</button>
+          <button class="prb prb-no" onclick="declinePauseReq()">Decline</button>
+        </div>
+      </div>
+      <div class="stage" id="h-stage"><div class="st-lot">Loading...</div></div>
+      <div class="bid-row">
+        <div class="timer-w">
+          <div class="t-ring">
+            <svg class="t-svg" width="76" height="76" viewBox="0 0 76 76">
+              <circle class="t-bg" cx="38" cy="38" r="31"/>
+              <circle class="t-fg" id="t-fg" cx="38" cy="38" r="31" stroke-dasharray="194.8" stroke-dashoffset="0" stroke="#FFD700"/>
+            </svg>
+            <div class="t-num" id="t-num">30</div>
+          </div>
+          <div class="t-lbl">seconds</div>
+        </div>
+        <div class="bid-box">
+          <div class="bb-lbl">Current Bid</div>
+          <div class="bb-amt" id="h-amt">—</div>
+          <div class="bb-who" id="h-who">No bids yet</div>
+          <div class="bb-nxt" id="h-nxt"></div>
+        </div>
+      </div>
+      <div class="hctrl">
+        <div class="hctrl-t">🎤 Host Controls</div>
+        <div class="hctrl-row">
+          <button class="hb hb-sold" id="hb-sold" onclick="hSold()">🔨 SOLD!</button>
+          <button class="hb hb-un" onclick="hUnsold()">❌ Unsold</button>
+        </div>
+        <button class="hb-skip" onclick="hSkip()">⏭ Skip Player (back to queue)</button>
+        <div class="hctrl-row2">
+          <button class="hb-ovr" onclick="openOverrideBid()">✏️ Override Bid</button>
+          <button class="hb-relist" id="hb-relist" onclick="hRelist()" disabled>🔄 Re-list Unsold</button>
+        </div>
+      </div>
+    </div>
+    <div class="side right">
+      <div class="pl">Up Next</div>
+      <div id="h-queue" style="max-height:200px;overflow-y:auto;margin-bottom:10px"></div>
+      <div class="pl">Bid History</div>
+      <div id="h-bid-hist" style="max-height:130px;overflow-y:auto;margin-bottom:10px"></div>
+      <div class="pl">Log</div>
+      <div id="h-log"></div>
+    </div>
+  </div>
+</div>
+
+<!-- HOST CHAT PANEL -->
+<div class="chat-panel" id="host-chat-panel">
+  <div class="chat-hdr">
+    <div class="chat-hdr-t">💬 Auction Room Chat</div>
+    <button class="chat-close" onclick="toggleHostChat()">✕</button>
+  </div>
+  <div class="chat-msgs" id="host-chat-msgs"></div>
+  <div class="chat-emoji-row">
+    <button class="chat-emoji-btn" onclick="sendEmoji('🔥')">🔥</button>
+    <button class="chat-emoji-btn" onclick="sendEmoji('😮')">😮</button>
+    <button class="chat-emoji-btn" onclick="sendEmoji('👏')">👏</button>
+    <button class="chat-emoji-btn" onclick="sendEmoji('😂')">😂</button>
+    <button class="chat-emoji-btn" onclick="sendEmoji('💰')">💰</button>
+    <button class="chat-emoji-btn" onclick="sendEmoji('🏏')">🏏</button>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="host-chat-input" placeholder="Message everyone..." maxlength="120" onkeydown="if(event.key==='Enter')sendHostChat()">
+    <button class="chat-send" onclick="sendHostChat()">Send</button>
+  </div>
+</div>
+
+<!-- BIDDER SCREEN -->
+<div id="pg-bid" class="screen">
+  <div class="bid-wrap">
+    <div class="bid-top">
+      <div class="bid-top-logo">🏏 IPL</div>
+      <div class="bid-top-team" id="b-tname">My Team</div>
+      <div class="bid-top-right">
+        <button class="bid-pause-req-btn" id="pause-req-btn" onclick="sendPauseRequest()">⏸ Pause?</button>
+        <div class="bid-top-purse" id="b-purse">₹120 Cr</div>
+      </div>
+    </div>
+    <div class="bid-tabs">
+      <div class="bid-tab active" onclick="switchTab('live')">🔴 Live</div>
+      <div class="bid-tab" onclick="switchTab('squads')">🏆 Squads</div>
+      <div class="bid-tab" onclick="switchTab('unsold')">❌ Passed</div>
+      <div class="bid-tab" onclick="switchTab('purse')">💰 Purse</div>
+      <div class="bid-tab" onclick="switchTab('watch')">⭐ Watch<span class="bid-tab-badge" id="watch-badge">0</span></div>
+    </div>
+    <!-- LIVE TAB -->
+    <div class="tab-pane active" id="tab-live">
+      <div class="bid-pause-msg" id="b-pause-msg">⏸ AUCTION PAUSED by host — please wait</div>
+      <div class="bid-player">
+        <div class="bid-lot" id="b-lot">Waiting...</div>
+        <div class="bid-pn" id="b-pn">—</div>
+        <span class="bid-pr" id="b-pr">—</span>
+        <div class="bid-pmeta" id="b-pmeta"></div>
+        <div class="bid-stats-row" id="b-stats-row"></div>
+      </div>
+      <div class="bid-live">
+        <div class="bid-t-ring">
+          <svg class="t-svg" width="62" height="62" viewBox="0 0 62 62">
+            <circle class="t-bg" cx="31" cy="31" r="26"/>
+            <circle class="t-fg" id="b-fg" cx="31" cy="31" r="26" stroke-dasharray="163.4" stroke-dashoffset="0" stroke="#FFD700"/>
+          </svg>
+          <div class="t-num" id="b-tnum" style="font-size:1.25rem">30</div>
+        </div>
+        <div class="bid-cur">
+          <div class="bc-lbl">Current Bid</div>
+          <div class="bc-amt" id="b-amt">—</div>
+          <div class="bc-who" id="b-who">No bids yet</div>
+          <div class="bc-nxt" id="b-nxt"></div>
+        </div>
+      </div>
+      <div class="bid-teams-scroll" id="b-teams"></div>
+      <div class="restrict-bar" id="b-restrict"></div>
+      <div class="bid-action">
+        <button class="big-btn" id="big-btn" onclick="doBid()" disabled>Waiting for host...</button>
+        <div class="bid-sub" id="bid-sub"></div>
+        <div class="conn-status ok" id="conn-status">● Connected to host</div>
+      </div>
+    </div>
+    <!-- SQUADS TAB -->
+    <div class="tab-pane" id="tab-squads">
+      <div id="b-squads-content" style="padding-bottom:10px"></div>
+    </div>
+    <!-- UNSOLD TAB -->
+    <div class="tab-pane" id="tab-unsold">
+      <div style="padding:10px 13px;font-size:.7rem;color:#555">Players passed/unsold during auction</div>
+      <div id="b-unsold-list"></div>
+    </div>
+    <!-- PURSE TAB -->
+    <div class="tab-pane" id="tab-purse">
+      <div style="padding:10px 13px;font-size:.7rem;color:#555">Remaining purse for all franchises</div>
+      <div id="b-purse-list"></div>
+    </div>
+    <!-- WATCHLIST TAB -->
+    <div class="tab-pane" id="tab-watch">
+      <div style="padding:10px 13px;font-size:.7rem;color:#555">Your starred players — track who you want</div>
+      <div id="b-watch-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- BIDDER CHAT FAB + PANEL -->
+<button class="bchat-fab" id="bchat-fab" style="display:none" onclick="toggleBidderChat()">💬<span class="bchat-badge" id="bchat-badge">0</span></button>
+<div class="bchat-panel" id="bchat-panel">
+  <div style="padding:10px 14px 0">
+    <div class="bchat-drag"></div>
+    <div class="bchat-hdr" style="padding:0 0 8px;border-bottom:1px solid var(--b1)">
+      <div style="font-size:.85rem;font-weight:700;color:var(--g)">💬 Room Chat</div>
+      <button onclick="toggleBidderChat()" style="background:none;border:none;color:#666;font-size:1rem;cursor:pointer">✕</button>
+    </div>
+  </div>
+  <div class="chat-msgs" id="bidder-chat-msgs" style="flex:1;overflow-y:auto;padding:10px"></div>
+  <div class="chat-emoji-row" style="padding:6px 10px;border-top:1px solid var(--b1);display:flex;gap:5px;background:rgba(0,0,0,.3)">
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('🔥')">🔥</button>
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('😮')">😮</button>
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('👏')">👏</button>
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('😂')">😂</button>
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('💰')">💰</button>
+    <button class="chat-emoji-btn" onclick="sendBidderEmoji('🏏')">🏏</button>
+  </div>
+  <div class="chat-input-row" style="display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--b1);background:rgba(0,0,0,.2)">
+    <input class="chat-input" id="bidder-chat-input" placeholder="Message everyone..." maxlength="120" onkeydown="if(event.key==='Enter')sendBidderChat()">
+    <button class="chat-send" onclick="sendBidderChat()">Send</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="pg-res" class="screen" style="min-height:100vh">
+  <div class="res-title">🏆 Final Squads</div>
+  <div class="res-sub" id="res-sub">IPL 2025 Auction Results</div>
+  <div class="res-export-row">
+    <button class="res-export-btn" onclick="exportResults()">📋 Copy Summary</button>
+    <button class="res-export-btn" onclick="exportCSV()">⬇️ Export CSV</button>
+  </div>
+  <div class="res-grid" id="res-grid"></div>
+  <button class="back-btn" onclick="go(amHost?'pg-host':'pg-bid')">← Back</button>
+</div>
+
+<!-- PICK PLAYER MODAL -->
+<div class="modal-bg" id="pick-modal" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closePickModal()">✕</button>
+    <h3>🔀 Pick Any Player</h3>
+    <input class="pick-search" id="pick-search" placeholder="Search player name..." oninput="renderPickList()">
+    <div class="pick-filter" id="pick-filter">
+      <button class="pf active" onclick="setPickFilter('all',event)">All</button>
+      <button class="pf" onclick="setPickFilter('queue',event)">In Queue</button>
+      <button class="pf" onclick="setPickFilter('unsold',event)">Unsold</button>
+      <button class="pf" onclick="setPickFilter('BAT',event)">BAT</button>
+      <button class="pf" onclick="setPickFilter('BOWL',event)">BOWL</button>
+      <button class="pf" onclick="setPickFilter('AR',event)">AR</button>
+      <button class="pf" onclick="setPickFilter('WK',event)">WK</button>
+      <button class="pf" onclick="setPickFilter('overseas',event)">Overseas</button>
+    </div>
+    <div class="pick-list" id="pick-list"></div>
+    <div style="font-size:.68rem;color:#444;margin-top:8px">Click any player to jump them to front · Click name for profile</div>
+  </div>
+</div>
+
+<!-- OVERRIDE BID MODAL -->
+<div class="modal-bg" id="override-modal" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('override-modal')">✕</button>
+    <h3>✏️ Override Current Bid</h3>
+    <div style="font-size:.8rem;color:#aaa;margin-bottom:12px">Manually set the bid amount (in Lakhs). Use to correct errors.</div>
+    <div class="f"><label>Bid Amount (₹ Lakhs)</label><input id="ovr-amt" type="number" min="5" step="5" placeholder="e.g. 200 for ₹2 Cr"></div>
+    <div class="f"><label>Bidding Team</label><select id="ovr-team"></select></div>
+    <div class="modal-btns">
+      <button class="btn btn-g" onclick="applyOverride()" style="flex:1">Apply Override</button>
+      <button class="btn btn-o" onclick="closeModal('override-modal')" style="flex:1">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYER PROFILE MODAL -->
+<div class="modal-bg" id="profile-modal" style="display:none">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('profile-modal')">✕</button>
+    <h3>👤 Player Profile</h3>
+    <div id="profile-content"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// PLAYER DATABASE — 85 players, full IPL 2025/26 pool
+// ═══════════════════════════════════════════════════
+const PL=[
+  {id:1,n:"Rishabh Pant",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:2,n:"Shreyas Iyer",r:"BAT",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:3,n:"KL Rahul",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:4,n:"Jos Buttler",r:"WK",c:"England",b:200,cap:1,mq:1,overseas:1},
+  {id:5,n:"Mitchell Starc",r:"BOWL",c:"Australia",b:200,cap:1,mq:1,overseas:1},
+  {id:6,n:"Arshdeep Singh",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:7,n:"Kagiso Rabada",r:"BOWL",c:"South Africa",b:200,cap:1,mq:1,overseas:1},
+  {id:8,n:"Mohammed Siraj",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:9,n:"Yuzvendra Chahal",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:10,n:"Liam Livingstone",r:"AR",c:"England",b:200,cap:1,mq:1,overseas:1},
+  {id:11,n:"David Miller",r:"BAT",c:"South Africa",b:150,cap:1,mq:1,overseas:1},
+  {id:12,n:"Mohammed Shami",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
+  {id:13,n:"Rohit Sharma",r:"BAT",c:"India",b:200,cap:1,overseas:0},
+  {id:14,n:"Virat Kohli",r:"BAT",c:"India",b:200,cap:1,overseas:0},
+  {id:15,n:"MS Dhoni",r:"WK",c:"India",b:200,cap:1,overseas:0},
+  {id:16,n:"Jasprit Bumrah",r:"BOWL",c:"India",b:200,cap:1,overseas:0},
+  {id:17,n:"Hardik Pandya",r:"AR",c:"India",b:200,cap:1,overseas:0},
+  {id:18,n:"Ravindra Jadeja",r:"AR",c:"India",b:200,cap:1,overseas:0},
+  {id:19,n:"Suryakumar Yadav",r:"BAT",c:"India",b:200,cap:1,overseas:0},
+  {id:20,n:"Shubman Gill",r:"BAT",c:"India",b:200,cap:1,overseas:0},
+  {id:21,n:"Yashasvi Jaiswal",r:"BAT",c:"India",b:200,cap:1,overseas:0},
+  {id:22,n:"Ishan Kishan",r:"WK",c:"India",b:200,cap:1,overseas:0},
+  {id:23,n:"Axar Patel",r:"AR",c:"India",b:200,cap:1,overseas:0},
+  {id:24,n:"Kuldeep Yadav",r:"BOWL",c:"India",b:200,cap:1,overseas:0},
+  {id:25,n:"Ruturaj Gaikwad",r:"BAT",c:"India",b:75,cap:1,overseas:0},
+  {id:26,n:"Tilak Varma",r:"BAT",c:"India",b:75,cap:1,overseas:0},
+  {id:27,n:"Shardul Thakur",r:"AR",c:"India",b:150,cap:1,overseas:0},
+  {id:28,n:"Deepak Chahar",r:"BOWL",c:"India",b:150,cap:1,overseas:0},
+  {id:29,n:"T Natarajan",r:"BOWL",c:"India",b:75,cap:1,overseas:0},
+  {id:30,n:"Washington Sundar",r:"AR",c:"India",b:75,cap:1,overseas:0},
+  {id:31,n:"Pat Cummins",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
+  {id:32,n:"Andre Russell",r:"AR",c:"West Indies",b:200,cap:1,overseas:1},
+  {id:33,n:"Sunil Narine",r:"AR",c:"West Indies",b:200,cap:1,overseas:1},
+  {id:34,n:"Glenn Maxwell",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
+  {id:35,n:"Rashid Khan",r:"AR",c:"Afghanistan",b:200,cap:1,overseas:1},
+  {id:36,n:"David Warner",r:"BAT",c:"Australia",b:150,cap:1,overseas:1},
+  {id:37,n:"Nicholas Pooran",r:"WK",c:"West Indies",b:150,cap:1,overseas:1},
+  {id:38,n:"Faf du Plessis",r:"BAT",c:"South Africa",b:150,cap:1,overseas:1},
+  {id:39,n:"Trent Boult",r:"BOWL",c:"New Zealand",b:150,cap:1,overseas:1},
+  {id:40,n:"Heinrich Klaasen",r:"WK",c:"South Africa",b:150,cap:1,overseas:1},
+  {id:41,n:"Travis Head",r:"BAT",c:"Australia",b:150,cap:1,overseas:1},
+  {id:42,n:"Marcus Stoinis",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
+  {id:43,n:"Sam Curran",r:"AR",c:"England",b:200,cap:1,overseas:1},
+  {id:44,n:"Wanindu Hasaranga",r:"AR",c:"Sri Lanka",b:150,cap:1,overseas:1},
+  {id:45,n:"Phil Salt",r:"WK",c:"England",b:150,cap:1,overseas:1},
+  {id:46,n:"Harry Brook",r:"BAT",c:"England",b:150,cap:1,overseas:1},
+  {id:47,n:"Marco Jansen",r:"AR",c:"South Africa",b:75,cap:1,overseas:1},
+  {id:48,n:"Matheesha Pathirana",r:"BOWL",c:"Sri Lanka",b:75,cap:1,overseas:1},
+  {id:49,n:"Alzarri Joseph",r:"BOWL",c:"West Indies",b:75,cap:1,overseas:1},
+  {id:50,n:"Romario Shepherd",r:"AR",c:"West Indies",b:75,cap:1,overseas:1},
+  {id:51,n:"Shimron Hetmyer",r:"BAT",c:"West Indies",b:75,cap:1,overseas:1},
+  {id:52,n:"Mujeeb Ur Rahman",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1},
+  {id:53,n:"Fazalhaq Farooqi",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1},
+  {id:54,n:"Rachin Ravindra",r:"AR",c:"New Zealand",b:75,cap:1,overseas:1},
+  {id:55,n:"Lockie Ferguson",r:"BOWL",c:"New Zealand",b:100,cap:1,overseas:1},
+  {id:56,n:"Spencer Johnson",r:"BOWL",c:"Australia",b:75,overseas:1},
+  {id:57,n:"Jake Fraser-McGurk",r:"BAT",c:"Australia",b:30,overseas:1},
+  {id:58,n:"Dewald Brevis",r:"BAT",c:"South Africa",b:75,overseas:1},
+  {id:59,n:"Noor Ahmad",r:"BOWL",c:"Afghanistan",b:30,overseas:1},
+  {id:60,n:"Rahmanullah Gurbaz",r:"WK",c:"Afghanistan",b:75,cap:1,overseas:1},
+  {id:61,n:"Rinku Singh",r:"BAT",c:"India",b:75,overseas:0},
+  {id:62,n:"Shivam Dube",r:"AR",c:"India",b:75,overseas:0},
+  {id:63,n:"Ravi Bishnoi",r:"BOWL",c:"India",b:75,overseas:0},
+  {id:64,n:"Khaleel Ahmed",r:"BOWL",c:"India",b:75,overseas:0},
+  {id:65,n:"Jitesh Sharma",r:"WK",c:"India",b:50,overseas:0},
+  {id:66,n:"Dhruv Jurel",r:"WK",c:"India",b:40,overseas:0},
+  {id:67,n:"Abhishek Sharma",r:"AR",c:"India",b:40,overseas:0},
+  {id:68,n:"Sai Sudharsan",r:"BAT",c:"India",b:40,overseas:0},
+  {id:69,n:"Nitish Kumar Reddy",r:"AR",c:"India",b:30,overseas:0},
+  {id:70,n:"Devdutt Padikkal",r:"BAT",c:"India",b:75,overseas:0},
+  {id:71,n:"Riyan Parag",r:"BAT",c:"India",b:30,overseas:0},
+  {id:72,n:"Harshit Rana",r:"BOWL",c:"India",b:30,overseas:0},
+  {id:73,n:"Mayank Yadav",r:"BOWL",c:"India",b:30,overseas:0},
+  {id:74,n:"Ramandeep Singh",r:"AR",c:"India",b:30,overseas:0},
+  {id:75,n:"Shahrukh Khan",r:"BAT",c:"India",b:30,overseas:0},
+  {id:76,n:"Ayush Badoni",r:"BAT",c:"India",b:20,overseas:0},
+  {id:77,n:"Arjun Tendulkar",r:"BOWL",c:"India",b:20,overseas:0},
+  {id:78,n:"Yash Dayal",r:"BOWL",c:"India",b:30,overseas:0},
+  {id:79,n:"Tushar Deshpande",r:"BOWL",c:"India",b:20,overseas:0},
+  {id:80,n:"Swapnil Singh",r:"AR",c:"India",b:20,overseas:0},
+  {id:81,n:"Nehal Wadhera",r:"BAT",c:"India",b:20,overseas:0},
+  {id:82,n:"Suyash Sharma",r:"BOWL",c:"India",b:20,overseas:0},
+  {id:83,n:"Abishek Porel",r:"WK",c:"India",b:20,overseas:0},
+  {id:84,n:"Vijaykumar Vyshak",r:"BOWL",c:"India",b:20,overseas:0},
+  {id:85,n:"Anuj Rawat",r:"WK",c:"India",b:20,overseas:0},
+];
+
+// ═══════ CONSTANTS ═══════
+const COLORS=["#FFD700","#00C851","#4A90D9","#FF6B6B","#B44FE8","#FF8C00","#00CED1","#FF69B4","#7CFC00","#FF4500"];
+const PURSE=12000,MAX_P=25,MIN_P=18,MAX_OVERSEAS=8,MIN_UNCAPPED=7,MIN_R=5,SECS=30;
+const C76=194.8,C62=163.4;
+
+// ═══════ STATE ═══════
+let amHost=false, myTid='', myName='', myTeamName='', roomCode='';
+let hostPeer=null, bidderConn=null, bidderConns={};
+let tickId=null, ovShown=false, pauseTs=0;
+let pickFilter='all';
+let chatOpen=false;
+let unreadChat=0;
+let myWatchlist=new Set(); // player ids
+let bidHistory=[]; // [{team,amt,ts}]
+let pendingPauseReq=null; // {peerId, teamName}
+let pauseReqSent=false;
+let chatMessages=[]; // [{sender,text,ts,isSystem,isEmoji}]
+let myDisplayName='Host';
+
+// ═══════ GLOBAL STATE ═══════
+let G={teams:[],Q:[],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,ts:Date.now(),
+       phase:'lobby',sold:0,unsold:0,skipped:0,numT:2,paused:false,pauseRem:SECS,relisted:false,
+       chat:[] };
+
+// ═══════ RESTRICTION CHECKER ═══════
+function getRules(t){
+  const ov=t.players.filter(p=>p.overseas).length;
+  const un=t.players.filter(p=>!p.cap&&!p.overseas).length;
+  const tot=t.players.length;
+  return{ov,un,tot,ovOk:ov<=MAX_OVERSEAS,ovFull:ov>=MAX_OVERSEAS,unOk:un>=MIN_UNCAPPED,unLow:un<MIN_UNCAPPED,totOk:tot>=MIN_P&&tot<=MAX_P};
+}
+function canBid(t,p){
+  const r=getRules(t);
+  const nb=G.bidder?G.bid+inc(G.bid):p.b;
+  if(t.purse-nb<MIN_R) return{ok:false,reason:'Insufficient purse'};
+  if(t.players.length>=MAX_P) return{ok:false,reason:'Squad full (25/25)'};
+  if(p.overseas&&r.ov>=MAX_OVERSEAS) return{ok:false,reason:'Overseas limit (8/8)'};
+  const slotsLeft=MAX_P-t.players.length;
+  const uncapNeeded=Math.max(0,MIN_UNCAPPED-r.un);
+  if(!p.overseas&&p.cap&&uncapNeeded>0&&uncapNeeded>=slotsLeft) return{ok:false,reason:`Need ${uncapNeeded} uncapped in ${slotsLeft} slots`};
+  return{ok:true};
+}
+
+// ═══════ SOUNDS ═══════
+function beep(freq=440,dur=100,vol=0.15,type='sine'){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.frequency.value=freq;o.type=type;
+    g.gain.setValueAtTime(vol,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur/1000);
+    o.start();o.stop(ctx.currentTime+dur/1000);
+  }catch(e){}
+}
+function playBid(){beep(880,80,0.12,'square');}
+function playSold(){beep(660,120,0.18,'sine');setTimeout(()=>beep(880,200,0.15,'sine'),120);}
+function playUnsold(){beep(220,300,0.1,'sawtooth');}
+function playTimer(){beep(440,60,0.08,'square');}
+function playChat(){beep(600,80,0.08,'sine');}
+
+// ═══════ HOST PEERJS ═══════
+function doHost(){
+  const num=+el('h-num').value;
+  el('host-btn').disabled=true;el('host-connecting').classList.add('show');
+  roomCode=rndCode();amHost=true;myDisplayName='Host';
+  const peerId='iplauc-'+roomCode;
+  hostPeer=new Peer(peerId,{debug:0});
+  hostPeer.on('open',()=>{
+    el('host-connecting').classList.remove('show');el('host-btn').disabled=false;
+    const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort(()=>Math.random()-.5);
+    G={teams:[],Q:[...mq,...rest],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
+       ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,chat:[]};
+    go('pg-lobby');
+    el('lob-code').textContent=roomCode;el('lob-title').textContent='Room '+roomCode;
+    el('hdr-room').textContent=roomCode;renderLobby();
+  });
+  hostPeer.on('error',e=>{
+    el('host-connecting').classList.remove('show');el('host-btn').disabled=false;
+    if(e.type==='unavailable-id'){toast('Retrying room code...');setTimeout(doHost,500);}
+    else toast('Connection error: '+e.type+'. Try again.');
+  });
+  hostPeer.on('connection',conn=>{
+    conn.on('open',()=>{bidderConns[conn.peer]=conn;conn.send({type:'STATE',G});updateConnCount();});
+    conn.on('data',msg=>handleBidderMsg(conn,msg));
+    conn.on('close',()=>{
+      const t=G.teams.find(t=>t.id===conn.peer);
+      delete bidderConns[conn.peer];updateConnCount();renderLobby();
+      if(t) systemChat(`${t.name} disconnected`);
+    });
+    conn.on('error',()=>{delete bidderConns[conn.peer];updateConnCount();});
+  });
+}
+function updateConnCount(){
+  const n=Object.keys(bidderConns).length;
+  el('lob-conn-count').textContent=n;el('hdr-conn').textContent=n;renderLobby();
+}
+function handleBidderMsg(conn,msg){
+  if(msg.type==='JOIN'){
+    const exists=G.teams.find(t=>t.id===conn.peer);
+    if(!exists&&G.teams.length<G.numT){
+      const idx=G.teams.length;
+      G.teams.push({id:conn.peer,name:msg.name,owner:msg.owner,color:COLORS[idx%COLORS.length],purse:PURSE,players:[]});
+      systemChat(`${msg.name} joined the room`);
+      broadcast();
+    } else if(exists){conn.send({type:'STATE',G});}
+    renderLobby();
+  }
+  if(msg.type==='BID'){
+    if(G.phase!=='bidding'||G.paused) return;
+    const me=G.teams.find(t=>t.id===conn.peer);if(!me) return;
+    const p=G.Q[G.idx];if(!p) return;
+    if(G.bidder===conn.peer) return;
+    const{ok}=canBid(me,p);if(!ok) return;
+    const nb=G.bidder?G.bid+inc(G.bid):p.b;
+    if(me.purse-nb<MIN_R) return;
+    G.bid=nb;G.bidder=conn.peer;G.ts=Date.now();
+    // Record bid history
+    bidHistory.unshift({team:me.name,color:me.color,amt:nb,ts:Date.now()});
+    if(bidHistory.length>20) bidHistory.pop();
+    broadcast();startTick();playBid();
+    renderBidHist();
+  }
+  if(msg.type==='CHAT'){
+    const t=G.teams.find(t=>t.id===conn.peer);
+    const sender=t?t.name:'?';
+    const entry={sender,text:msg.text,ts:Date.now(),isSystem:false,isEmoji:msg.isEmoji,color:t?.color};
+    G.chat.push(entry);
+    if(G.chat.length>100) G.chat.shift();
+    broadcast();
+    appendChatMsg('host-chat-msgs',entry,'host');
+    if(!chatOpen){unreadChat++;updateChatBadge();}
+    if(msg.isEmoji) floatEmoji(msg.text);
+    else playChat();
+  }
+  if(msg.type==='PAUSE_REQ'){
+    const t=G.teams.find(t=>t.id===conn.peer);
+    if(t&&!G.paused){
+      pendingPauseReq={peerId:conn.peer,teamName:t.name};
+      el('h-pause-req-text').textContent=`⏸ Pause requested by ${t.name}`;
+      el('h-pause-req').classList.add('show');
+    }
+  }
+}
+function broadcast(){
+  Object.values(bidderConns).forEach(c=>{try{c.send({type:'STATE',G});}catch(e){}});
+  if(G.phase==='lobby') renderLobby(); else renderHostUI();
+}
+
+// ═══════ BIDDER PEERJS ═══════
+function doJoin(){
+  const name=v('j-name'),team=v('j-team'),code=v('j-code').toUpperCase();
+  if(!name||!team||!code||code.length<6){toast('Fill all fields and enter the 6-digit code');return;}
+  el('join-btn').disabled=true;el('join-connecting').classList.add('show');
+  roomCode=code;amHost=false;myName=name;myTeamName=team;myDisplayName=team;
+  const myPeerId='bidder-'+Math.random().toString(36).substring(2,10);
+  const bidderPeer=new Peer(myPeerId,{debug:0});
+  bidderPeer.on('open',()=>{
+    bidderConn=bidderPeer.connect('iplauc-'+code,{reliable:true});
+    bidderConn.on('open',()=>{
+      el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
+      myTid=myPeerId;
+      bidderConn.send({type:'JOIN',name:team,owner:name});
+      go('pg-bid');el('b-tname').textContent=team;
+      el('conn-status').textContent='● Connected to host';el('conn-status').className='conn-status ok';
+      el('bchat-fab').style.display='flex';
+    });
+    bidderConn.on('data',msg=>{
+      if(msg.type==='STATE'){
+        const prevBidder=G.bidder;
+        G=msg.G;renderBidderUI();
+        if(G.bidder&&G.bidder!==prevBidder) playBid();
+        if(G.phase==='bidding'&&!G.paused) startTick(); else clearInterval(tickId);
+        if(G.phase==='sold'&&!ovShown){ovShown=true;showOvSold();playSold();}
+        if(G.phase==='unsold'&&!ovShown){ovShown=true;showOvUnsold();playUnsold();}
+        if(G.phase!=='sold'&&G.phase!=='unsold'){ovShown=false;document.querySelector('.ov')?.remove();}
+        if(G.phase==='done'){clearInterval(tickId);go('pg-res');renderRes();}
+        // sync chat
+        syncBidderChat();
+      }
+    });
+    bidderConn.on('close',()=>{el('conn-status').textContent='● Disconnected — refresh to reconnect';el('conn-status').className='conn-status bad';});
+    bidderConn.on('error',()=>{el('conn-status').textContent='● Connection error';el('conn-status').className='conn-status bad';});
+  });
+  bidderPeer.on('error',e=>{
+    el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
+    if(e.type==='peer-unavailable') toast('❌ Room "'+code+'" not found. Check the code and make sure host is online.');
+    else toast('Error: '+e.type);
+  });
+}
+function doBid(){if(!bidderConn||G.phase!=='bidding'||G.paused) return;bidderConn.send({type:'BID'});}
+
+// ═══════ HOST CONTROLS ═══════
+function doStart(){
+  if(!amHost) return;
+  G.phase='bidding';G.idx=0;G.bid=0;G.bidder=null;G.ts=Date.now();
+  G.sold=0;G.unsold=0;G.skipped=0;G.paused=false;
+  broadcast();go('pg-host');startTick();
+  systemChat('Auction started! Good luck everyone 🏏');
+}
+function hSold(){if(!amHost||!G.bidder||G.paused) return;clearInterval(tickId);doSold();}
+function hUnsold(){if(!amHost) return;clearInterval(tickId);doUnsold();}
+function hSkip(){
+  if(!amHost) return;
+  if(!confirm('Skip this player? They will go to the back of the queue.')) return;
+  clearInterval(tickId);
+  const p=G.Q[G.idx];
+  if(p){G.skippedList.push({...p,status:'skipped'});G.skipped++;}
+  G.Q.splice(G.idx,1);G.Q.push(p);
+  G.bid=0;G.bidder=null;G.ts=Date.now();G.phase='bidding';
+  broadcast();startTick();
+}
+function togglePause(){
+  if(!amHost) return;
+  G.paused=!G.paused;
+  if(G.paused){
+    const elapsed=Math.floor((Date.now()-G.ts)/1000);
+    G.pauseRem=Math.max(0,SECS-elapsed);
+    clearInterval(tickId);
+    el('pause-btn').textContent='▶ Resume';el('pause-btn').classList.add('paused');
+    el('h-pause-banner').classList.add('show');
+    systemChat('⏸ Auction paused by host');
+  } else {
+    G.ts=Date.now()-(SECS-G.pauseRem)*1000;
+    el('pause-btn').textContent='⏸ Pause';el('pause-btn').classList.remove('paused');
+    el('h-pause-banner').classList.remove('show');
+    startTick();
+    systemChat('▶ Auction resumed');
+  }
+  broadcast();
+}
+function acceptPauseReq(){
+  el('h-pause-req').classList.remove('show');
+  pendingPauseReq=null;
+  if(!G.paused) togglePause();
+}
+function declinePauseReq(){
+  el('h-pause-req').classList.remove('show');
+  const t=G.teams.find(t=>t.id===pendingPauseReq?.peerId);
+  if(t) toast(`Declined pause request from ${t.name}`);
+  pendingPauseReq=null;
+}
+function hRelist(){
+  if(!amHost||G.phase!=='bidding') return;
+  const toAdd=G.unsoldList.filter(p=>p.status==='unsold');
+  if(!toAdd.length){toast('No unsold players to re-list');return;}
+  toAdd.forEach(p=>G.Q.push({...p}));
+  G.unsoldList=G.unsoldList.filter(p=>p.status!=='unsold');
+  G.relisted=true;
+  toast(`🔄 Re-listed ${toAdd.length} unsold player(s)`);
+  broadcast();
+}
+
+// ═══════ PAUSE REQUEST (bidder) ═══════
+function sendPauseRequest(){
+  if(!bidderConn||pauseReqSent) return;
+  bidderConn.send({type:'PAUSE_REQ'});
+  pauseReqSent=true;
+  const btn=el('pause-req-btn');
+  btn.textContent='⏸ Sent!';btn.classList.add('sent');btn.disabled=true;
+  setTimeout(()=>{pauseReqSent=false;btn.textContent='⏸ Pause?';btn.classList.remove('sent');btn.disabled=false;},20000);
+  toast('Pause request sent to host');
+}
+
+// ═══════ CHAT ═══════
+function toggleHostChat(){
+  chatOpen=!chatOpen;
+  el('host-chat-panel').classList.toggle('open',chatOpen);
+  if(chatOpen){unreadChat=0;updateChatBadge();el('host-chat-input').focus();}
+}
+function sendHostChat(){
+  const input=el('host-chat-input');
+  const text=input.value.trim();if(!text) return;
+  input.value='';
+  const entry={sender:'Host',text,ts:Date.now(),isSystem:false,isEmoji:false,color:'#FFD700'};
+  G.chat.push(entry);if(G.chat.length>100) G.chat.shift();
+  broadcast();
+  appendChatMsg('host-chat-msgs',entry,'host');
+}
+function sendEmoji(emoji){
+  const entry={sender:'Host',text:emoji,ts:Date.now(),isSystem:false,isEmoji:true,color:'#FFD700'};
+  G.chat.push(entry);if(G.chat.length>100) G.chat.shift();
+  broadcast();
+  appendChatMsg('host-chat-msgs',entry,'host');
+  floatEmoji(emoji);
+}
+function sendBidderChat(){
+  if(!bidderConn) return;
+  const input=el('bidder-chat-input');
+  const text=input.value.trim();if(!text) return;
+  input.value='';
+  bidderConn.send({type:'CHAT',text,isEmoji:false});
+}
+function sendBidderEmoji(emoji){
+  if(!bidderConn) return;
+  bidderConn.send({type:'CHAT',text:emoji,isEmoji:true});
+  floatEmoji(emoji);
+}
+function toggleBidderChat(){
+  const panel=el('bchat-panel');
+  const open=panel.classList.toggle('open');
+  if(open){
+    el('bchat-badge').classList.remove('show');
+    el('bchat-badge').textContent='0';
+    el('bidder-chat-input').focus();
+    scrollChat('bidder-chat-msgs');
+  }
+}
+function systemChat(text){
+  const entry={sender:'System',text,ts:Date.now(),isSystem:true};
+  G.chat.push(entry);if(G.chat.length>100) G.chat.shift();
+  broadcast();
+  appendChatMsg('host-chat-msgs',entry,'host');
+}
+let lastSyncedChatLen=0;
+function syncBidderChat(){
+  const msgs=G.chat||[];
+  for(let i=lastSyncedChatLen;i<msgs.length;i++){
+    appendChatMsg('bidder-chat-msgs',msgs[i],'bidder');
+    if(!el('bchat-panel').classList.contains('open')){
+      const badge=el('bchat-badge');
+      let n=parseInt(badge.textContent||'0')+1;
+      badge.textContent=n;badge.classList.add('show');
+    }
+    if(msgs[i].isEmoji) floatEmoji(msgs[i].text);
+    else if(!msgs[i].isSystem) playChat();
+  }
+  lastSyncedChatLen=msgs.length;
+}
+function appendChatMsg(containerId,entry,role){
+  const c=el(containerId);if(!c) return;
+  const isMe=(role==='host'&&entry.sender==='Host')||(role==='bidder'&&entry.sender===myTeamName);
+  const d=document.createElement('div');
+  d.className='chat-msg'+(entry.isSystem?' system':isMe?' mine':'');
+  if(entry.isSystem){
+    d.innerHTML=`<div class="chat-msg-body">${entry.text}</div>`;
+  } else {
+    const col=entry.color||'#aaa';
+    d.innerHTML=`<div class="chat-msg-hdr"><span class="chat-msg-name" style="color:${col}">${entry.sender}</span><span class="chat-msg-time">${fmtTime(entry.ts)}</span></div><div class="chat-msg-body">${entry.isEmoji?'<span style="font-size:1.5rem">'+entry.text+'</span>':escHtml(entry.text)}</div>`;
+  }
+  c.appendChild(d);
+  scrollChat(containerId);
+}
+function scrollChat(id){const c=el(id);if(c) c.scrollTop=c.scrollHeight;}
+function updateChatBadge(){
+  const b=el('h-chat-badge');
+  if(unreadChat>0){b.textContent=unreadChat;b.classList.add('show');}
+  else{b.classList.remove('show');}
+}
+
+// ═══════ WATCHLIST ═══════
+function toggleWatch(pid){
+  if(myWatchlist.has(pid)) myWatchlist.delete(pid);
+  else myWatchlist.add(pid);
+  renderWatchTab();
+  updateWatchBadge();
+  const btn=document.getElementById('wb-'+pid);
+  if(btn) btn.textContent=myWatchlist.has(pid)?'⭐ Watching':'☆ Watch';
+}
+function updateWatchBadge(){
+  const b=el('watch-badge');
+  if(myWatchlist.size>0){b.textContent=myWatchlist.size;b.classList.add('show');}
+  else b.classList.remove('show');
+}
+function renderWatchTab(){
+  const container=el('b-watch-list');if(!container) return;
+  const items=[...myWatchlist].map(pid=>{
+    const p=PL.find(x=>x.id===pid);if(!p) return '';
+    // check if already sold
+    let soldTo=null,soldPrice=0;
+    G.teams.forEach(t=>{const sp=t.players.find(x=>x.id===pid);if(sp){soldTo=t;soldPrice=sp.sp;}});
+    const inQueue=G.Q.findIndex((x,i)=>x.id===pid&&i>=G.idx)>=G.idx;
+    return `<div class="watch-item">
+      <div style="flex:1">
+        <div style="font-size:.82rem;font-weight:700;cursor:pointer" onclick="openProfile(${pid})">${p.n}${p.mq?' ⭐':''}</div>
+        <div style="font-size:.63rem;color:#666;margin-top:2px"><span class="r-${p.r}" style="padding:1px 5px;border-radius:3px;font-size:.58rem;font-weight:700">${RL(p.r)}</span> · ${p.c} · Base ${F(p.b)}</div>
+        <div style="font-size:.62rem;margin-top:2px;color:${soldTo?'#00C851':inQueue?'#ffa500':'#666'}">${soldTo?'✅ Sold to '+soldTo.name+' for '+F(soldPrice):inQueue?'⏳ In queue':'—'}</div>
+      </div>
+      <button class="watch-star" onclick="toggleWatch(${pid})" title="Remove from watchlist">✕</button>
+    </div>`;
+  }).join('') || '<div style="padding:20px;text-align:center;color:#444;font-size:.8rem">No watched players yet.<br>Tap ☆ Watch on any player to track them.</div>';
+  container.innerHTML=items;
+}
+
+// ═══════ PLAYER PROFILE ═══════
+function openProfile(pid){
+  const p=PL.find(x=>x.id===pid);if(!p) return;
+  let soldTo=null,soldPrice=0;
+  G.teams.forEach(t=>{const sp=t.players.find(x=>x.id===pid);if(sp){soldTo=t;soldPrice=sp.sp;}});
+  const watching=myWatchlist.has(pid);
+  const searchName=encodeURIComponent(p.n);
+  el('profile-content').innerHTML=`
+    <div class="profile-hero">
+      <span class="r-${p.r}" style="padding:3px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${RL(p.r)}</span>
+      <div class="profile-name" style="margin-top:8px">${p.n}${p.mq?' ⭐':''}</div>
+      <div style="font-size:.75rem;color:#888;margin-top:2px">${p.c} · ${p.cap?'Capped Indian':'Uncapped'}${p.overseas?' · 🌍 Overseas':''}</div>
+      <div class="profile-meta">
+        <div class="pm-item"><div class="pm-v">${F(p.b)}</div><div class="pm-l">Base Price</div></div>
+        <div class="pm-item"><div class="pm-v">${p.cap?'✅ Yes':'🔓 No'}</div><div class="pm-l">Capped</div></div>
+        <div class="pm-item"><div class="pm-v">${p.overseas?'🌍 Yes':'🇮🇳 No'}</div><div class="pm-l">Overseas</div></div>
+        <div class="pm-item"><div class="pm-v" style="color:${soldTo?'#00C851':'#ffa500'}">${soldTo?F(soldPrice):'Not sold'}</div><div class="pm-l">${soldTo?'Sold to '+soldTo.name:'Auction Status'}</div></div>
+      </div>
+    </div>
+    <div class="profile-links">
+      <a class="profile-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">
+        <span class="profile-link-icon">🏏</span>
+        <div><div class="profile-link-label">ESPN Cricinfo</div><div class="profile-link-sub">Career stats, matches, records</div></div>
+        <span style="margin-left:auto;color:#444">↗</span>
+      </a>
+      <a class="profile-link" href="https://www.iplt20.com/search?query=${searchName}" target="_blank" rel="noopener">
+        <span class="profile-link-icon">🔵</span>
+        <div><div class="profile-link-label">IPL Official Page</div><div class="profile-link-sub">IPL stats, franchise history</div></div>
+        <span style="margin-left:auto;color:#444">↗</span>
+      </a>
+      <a class="profile-link" href="https://www.google.com/search?q=${searchName}+cricket+stats+IPL+2025" target="_blank" rel="noopener">
+        <span class="profile-link-icon">🔍</span>
+        <div><div class="profile-link-label">Google Search</div><div class="profile-link-sub">Latest news &amp; analysis</div></div>
+        <span style="margin-left:auto;color:#444">↗</span>
+      </a>
+    </div>
+    ${!amHost?`<div style="margin-top:12px"><button onclick="toggleWatch(${pid});closeModal('profile-modal')" style="width:100%;padding:11px;border-radius:10px;border:1px solid ${watching?'var(--rd)':'rgba(255,215,0,.3)'};background:${watching?'rgba(255,59,48,.1)':'rgba(255,215,0,.07)'};color:${watching?'#ff8888':'var(--g)'};font-size:.85rem;font-weight:700;cursor:pointer">${watching?'⭐ Remove from Watchlist':'☆ Add to Watchlist'}</button></div>`:''}`;
+  el('profile-modal').style.display='flex';
+}
+
+// ═══════ PICK PLAYER MODAL ═══════
+function openPickModal(){
+  pickFilter='all';el('pick-search').value='';
+  renderPickList();el('pick-modal').style.display='flex';
+}
+function closePickModal(){el('pick-modal').style.display='none';}
+function setPickFilter(f,e){
+  pickFilter=f;
+  document.querySelectorAll('#pick-filter .pf').forEach(b=>b.classList.remove('active'));
+  if(e&&e.target) e.target.classList.add('active');
+  renderPickList();
+}
+function renderPickList(){
+  const q=el('pick-search').value.toLowerCase();
+  const soldIds=new Set();G.teams.forEach(t=>t.players.forEach(p=>soldIds.add(p.id)));
+  let pool=G.Q.slice(G.idx).map(p=>({...p,_src:'queue'}));
+  G.unsoldList.forEach(p=>{if(!soldIds.has(p.id)) pool.push({...p,_src:'unsold'});});
+  if(q) pool=pool.filter(p=>p.n.toLowerCase().includes(q));
+  if(pickFilter==='queue') pool=pool.filter(p=>p._src==='queue');
+  else if(pickFilter==='unsold') pool=pool.filter(p=>p._src==='unsold');
+  else if(['BAT','BOWL','AR','WK'].includes(pickFilter)) pool=pool.filter(p=>p.r===pickFilter);
+  else if(pickFilter==='overseas') pool=pool.filter(p=>p.overseas);
+  el('pick-list').innerHTML=pool.slice(0,60).map(p=>`
+    <div class="pick-item${p._src==='unsold'?' unsold-p':''}" onclick="pickPlayer(${p.id})">
+      <div class="pick-left">
+        <div class="pick-n">${p.n}${p.mq?' ⭐':''}</div>
+        <div class="pick-m"><span class="r-${p.r}" style="padding:1px 5px;border-radius:3px;font-size:.6rem;font-weight:700">${RL(p.r)}</span> · ${p.c} · ${p.cap?'Capped':'Uncapped'} · ${p._src==='unsold'?'<span style="color:#ff8888">Unsold</span>':'In Queue'}</div>
+      </div>
+      <div class="pick-p">${F(p.b)}</div>
+    </div>`).join('')||'<div style="padding:20px;text-align:center;color:#444;font-size:.82rem">No players found</div>';
+}
+function pickPlayer(pid){
+  if(!amHost) return;
+  clearInterval(tickId);
+  const soldIds=new Set();G.teams.forEach(t=>t.players.forEach(p=>soldIds.add(p.id)));
+  const qIdx=G.Q.findIndex((p,i)=>p.id===pid&&i>=G.idx);
+  if(qIdx>=G.idx){
+    const[p]=G.Q.splice(qIdx,1);G.Q.splice(G.idx,0,p);
+  } else {
+    const uIdx=G.unsoldList.findIndex(p=>p.id===pid);
+    if(uIdx>=0){const[p]=G.unsoldList.splice(uIdx,1);G.Q.splice(G.idx,0,p);}
+  }
+  G.bid=0;G.bidder=null;G.ts=Date.now();G.paused=false;
+  closePickModal();broadcast();startTick();
+  toast(`🔀 Jumped to: ${PL.find(p=>p.id===pid)?.n}`);
+}
+function jumpToFront(pid){if(!amHost) return;pickPlayer(pid);}
+
+// ═══════ OVERRIDE BID ═══════
+function openOverrideBid(){
+  if(!amHost) return;
+  const p=G.Q[G.idx];if(!p) return;
+  el('ovr-amt').value=G.bid||p.b;
+  el('ovr-team').innerHTML=G.teams.map(t=>`<option value="${t.id}" ${t.id===G.bidder?'selected':''}>${t.name}</option>`).join('');
+  el('override-modal').style.display='flex';
+}
+function applyOverride(){
+  const amt=parseInt(el('ovr-amt').value)||0;
+  const tid=el('ovr-team').value;
+  if(amt<5){toast('Minimum bid is ₹5L');return;}
+  G.bid=amt;G.bidder=tid;G.ts=Date.now();
+  closeModal('override-modal');broadcast();startTick();
+  toast(`✏️ Bid overridden to ${F(amt)}`);
+}
+function closeModal(id){el(id).style.display='none';}
+
+// ═══════ SOLD / UNSOLD ═══════
+function doSold(){
+  const p=G.Q[G.idx],w=G.teams.find(t=>t.id===G.bidder);
+  if(!w||!p){doUnsold();return;}
+  w.purse-=G.bid;w.players.push({...p,sp:G.bid});G.sold++;
+  G.phase='sold';broadcast();
+  showOvSold();addLog(p,w,G.bid);
+  systemChat(`🔨 ${p.n} SOLD to ${w.name} for ${F(G.bid)}`);
+  setTimeout(()=>{document.querySelector('.ov')?.remove();ovShown=false;advance();},2800);
+}
+function doUnsold(){
+  const p=G.Q[G.idx];G.unsold++;
+  G.unsoldList.push({...p,status:'unsold'});
+  el('hb-relist').disabled=false;
+  G.phase='unsold';broadcast();
+  showOvUnsold();addLog(p,null,0);
+  setTimeout(()=>{document.querySelector('.ov')?.remove();ovShown=false;advance();},1800);
+}
+function advance(){
+  G.idx++;
+  bidHistory=[];renderBidHist();
+  G.bid=0;G.bidder=null;G.ts=Date.now();
+  if(G.idx>=G.Q.length){
+    const unsoldRemain=G.unsoldList.filter(p=>p.status==='unsold');
+    if(unsoldRemain.length>0&&!G.relisted){
+      G.phase='bidding';broadcast();
+      if(amHost) toast(`🏁 Main auction done! ${unsoldRemain.length} unsold. Click Re-list Unsold.`);
+    } else {
+      G.phase='done';broadcast();clearInterval(tickId);
+      systemChat('🏆 Auction complete! Final squads locked.');
+      if(amHost){go('pg-res');renderRes();}
+    }
+  } else {
+    G.phase='bidding';broadcast();startTick();
+  }
+}
+
+// ═══════ TIMER ═══════
+function startTick(){clearInterval(tickId);doTick();tickId=setInterval(doTick,250);}
+function doTick(){
+  if(G.paused){setTimerUI(G.pauseRem);return;}
+  const elapsed=Math.floor((Date.now()-G.ts)/1000);
+  const rem=Math.max(0,SECS-elapsed);
+  setTimerUI(rem);
+  if(rem<=5&&rem>0&&amHost) playTimer();
+  if(rem<=0){
+    clearInterval(tickId);
+    if(amHost&&G.phase==='bidding'&&!G.paused){
+      if(G.bidder) doSold(); else doUnsold();
+    }
+  }
+}
+function setTimerUI(val){
+  const pct=val/SECS,col=val>10?'#FFD700':val>5?'#FF9500':'#FF3B30';
+  const tn=el('t-num'),tf=el('t-fg');
+  if(tn){tn.textContent=val;tn.style.color=col;}
+  if(tf){tf.style.strokeDashoffset=C76*(1-pct);tf.style.stroke=col;}
+  const bn=el('b-tnum'),bf=el('b-fg');
+  if(bn){bn.textContent=val;bn.style.color=col;}
+  if(bf){bf.style.strokeDashoffset=C62*(1-pct);bf.style.stroke=col;}
+}
+
+// ═══════ RENDER HOST ═══════
+function renderHostUI(){
+  setT('hs-sold',G.sold);setT('hs-un',G.unsold);setT('hs-sk',G.skipped);
+  setT('hs-rem',Math.max(0,G.Q.length-G.idx));
+  if(G.paused){
+    el('pause-btn').textContent='▶ Resume';el('pause-btn').classList.add('paused');
+    el('h-pause-banner').classList.add('show');
+  } else {
+    el('pause-btn').textContent='⏸ Pause';el('pause-btn').classList.remove('paused');
+    el('h-pause-banner').classList.remove('show');
+  }
+  const p=G.Q[G.idx];
+  const stage=el('h-stage');
+  if(!p){
+    const unsoldRemain=G.unsoldList.filter(p=>p.status==='unsold');
+    stage.innerHTML=`<div class="st-lot" style="font-size:1rem;padding:18px">🏆 Main auction complete!<br><span style="font-size:.8rem;color:#777;font-weight:400">${unsoldRemain.length?`${unsoldRemain.length} unsold — click Re-list Unsold`:'All done!'}</span></div>`;
+    return;
+  }
+  const searchName=encodeURIComponent(p.n);
+  stage.innerHTML=`<div class="st-lot">LOT ${G.idx+1}/${G.Q.length}${p.mq?' ⭐ MARQUEE':''}</div>
+    <div class="st-name">${p.n}</div>
+    <span class="st-role r-${p.r}">${RL(p.r)}</span>
+    <div class="st-grid">
+      <div class="st-item"><div class="st-v">${p.c}</div><div class="st-l">Nation</div></div>
+      <div class="st-item"><div class="st-v">${F(p.b)}</div><div class="st-l">Base Price</div></div>
+      <div class="st-item"><div class="st-v">${p.cap?'✅ Capped':'🔓 Uncapped'}</div><div class="st-l">Status</div></div>
+      <div class="st-item"><div class="st-v">${p.overseas?'🌍 Yes':'🇮🇳 No'}</div><div class="st-l">Overseas</div></div>
+      <div class="st-item"><div class="st-v">${RL(p.r)}</div><div class="st-l">Role</div></div>
+      <div class="st-item"><div class="st-v">${G.Q.length-G.idx-1}</div><div class="st-l">After This</div></div>
+    </div>
+    <a class="st-stats-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">🏏 View Stats on Cricinfo ↗</a>`;
+  if(G.bidder){
+    const t=G.teams.find(t=>t.id===G.bidder);
+    setT('h-amt',F(G.bid));
+    el('h-who').innerHTML=`Led by <span style="color:${t?.color||'#FFD700'}">${t?.name||'?'}</span>`;
+    setT('h-nxt','Next: '+F(G.bid+inc(G.bid)));
+  } else {
+    setT('h-amt',F(p.b));setT('h-who','No bids yet');setT('h-nxt','Opens at '+F(p.b));
+  }
+  el('hb-sold').disabled=!G.bidder||G.phase!=='bidding';
+  el('hb-relist').disabled=!G.unsoldList.filter(p=>p.status==='unsold').length;
+  // Teams sidebar
+  el('h-teams').innerHTML=G.teams.map(t=>{
+    const pct=Math.round(t.purse/PURSE*100);
+    const r=getRules(t);
+    const tags=[
+      `<span class="tag ${r.ovFull?'tag-warn':'tag-ok'}">${r.ov}/8 OV</span>`,
+      `<span class="tag ${r.unOk?'tag-ok':'tag-warn'}">${r.un}/${MIN_UNCAPPED} UC</span>`,
+      `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-warn'}">${r.tot}/${MAX_P}</span>`,
+    ].join('');
+    const isLead=t.id===G.bidder;
+    return`<div class="tc${isLead?' lead':''}">
+      <div class="tc-h"><div class="tc-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div>
+        <div><div class="tc-n">${t.name}</div><div class="tc-o">${t.owner}</div></div></div>
+      <div class="tc-p" style="color:${t.color}">${F(t.purse)}</div>
+      <div class="tc-i">${t.players.length}/${MAX_P} players${isLead?' 🔥 Leading':''}</div>
+      <div class="tc-rules">${tags}</div>
+      <div class="pb"><div class="pb-f" style="width:${pct}%;background:${t.color}"></div></div>
+    </div>`;
+  }).join('');
+  // Queue
+  el('h-queue').innerHTML=G.Q.slice(G.idx,G.idx+15).map((p,i)=>`
+    <div class="qi${i===0?' cur':' clickable'}" onclick="${i>0?`jumpToFront(${p.id})`:''}" title="${i>0?'Click to bring to front':'Current player'}">
+      <div><div class="qi-n">${p.n}${p.mq?' ⭐':''}</div><div class="qi-r">${RL(p.r)} · ${p.c}</div></div>
+      <div class="qi-p">${F(p.b)}</div>
+    </div>`).join('');
+}
+function renderBidHist(){
+  const c=el('h-bid-hist');if(!c) return;
+  if(!bidHistory.length){c.innerHTML='<div style="color:#333;font-size:.65rem;padding:4px">No bids yet this round</div>';return;}
+  c.innerHTML=bidHistory.map((h,i)=>`
+    <div class="hist-item">
+      <span class="hist-team" style="color:${h.color}">${h.team}</span>
+      <span class="hist-amt"> ${F(h.amt)}</span>
+      <span class="hist-time"> · ${fmtTime(h.ts)}</span>
+    </div>`).join('');
+}
+
+// ═══════ RENDER BIDDER ═══════
+function renderBidderUI(){
+  const me=G.teams.find(t=>t.id===myTid);
+  if(me){setT('b-tname',me.name);setT('b-purse',F(me.purse));}
+  const pm=el('b-pause-msg');if(pm){if(G.paused) pm.classList.add('show');else pm.classList.remove('show');}
+  const p=G.Q[G.idx];if(!p) return;
+  setT('b-lot',`LOT ${G.idx+1}/${G.Q.length}${p.mq?' ⭐':''}`);
+  setT('b-pn',p.n);
+  const pr=el('b-pr');if(pr){pr.textContent=RL(p.r);pr.className='bid-pr r-'+p.r;}
+  el('b-pmeta').innerHTML=`
+    <div class="bpm"><div class="bpm-v">${p.c}</div><div class="bpm-l">Nation</div></div>
+    <div class="bpm"><div class="bpm-v">${F(p.b)}</div><div class="bpm-l">Base</div></div>
+    <div class="bpm"><div class="bpm-v">${p.cap?'✅ Capped':'🔓 Uncapped'}</div><div class="bpm-l">Status</div></div>`;
+  // Stats links + watchlist
+  const searchName=encodeURIComponent(p.n);
+  const watching=myWatchlist.has(p.id);
+  el('b-stats-row').innerHTML=`
+    <a class="bid-stats-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">🏏 Cricinfo ↗</a>
+    <a class="bid-stats-link" href="https://www.iplt20.com/search?query=${searchName}" target="_blank" rel="noopener">🔵 IPL ↗</a>
+    <button class="bid-watchlist-btn ${watching?'starred':''}" id="wb-${p.id}" onclick="toggleWatch(${p.id})">${watching?'⭐ Watching':'☆ Watch'}</button>
+    <button class="bid-stats-link" style="cursor:pointer;background:none;border:1px solid rgba(255,255,255,.12);color:#888" onclick="openProfile(${p.id})">👤 Profile</button>`;
+  if(G.bidder){
+    const t=G.teams.find(t=>t.id===G.bidder);
+    setT('b-amt',F(G.bid));
+    el('b-who').innerHTML=`<span style="color:${t?.color||'#FFD700'}">${t?.name||'?'}</span> leading`;
+    setT('b-nxt','Next: '+F(G.bid+inc(G.bid)));
+  } else {
+    setT('b-amt',F(p.b));setT('b-who','No bids yet');setT('b-nxt','Opens: '+F(p.b));
+  }
+  // Teams row
+  el('b-teams').innerHTML=G.teams.map(t=>`
+    <div class="bmt${t.id===G.bidder?' lead':''}${t.id===myTid?' me':''}">
+      <div class="bmt-n" style="color:${t.color}">${t.name}</div>
+      <div class="bmt-p">${F(t.purse)}</div>
+      ${t.id===G.bidder?'<div class="bmt-b">🔥 Leading</div>':t.id===myTid?'<div class="bmt-b" style="color:#666">You</div>':''}
+    </div>`).join('');
+  // Restriction bar
+  if(me){
+    const r=getRules(me);
+    el('b-restrict').innerHTML=[
+      `<span class="rb-item ${r.ovFull?'rb-warn':'rb-ok'}">${r.ov}/8 Overseas${r.ovFull?' FULL':''}</span>`,
+      `<span class="rb-item ${r.unOk?'rb-ok':'rb-warn'}">${r.un}/${MIN_UNCAPPED} Uncapped${r.unLow?' ⚠️':''}</span>`,
+      `<span class="rb-item ${r.tot>=MAX_P?'rb-err':r.tot>=MIN_P?'rb-ok':'rb-warn'}">${r.tot}/${MAX_P} Players</span>`,
+      `<span class="rb-item rb-ok">${F(me.purse)} Left</span>`,
+    ].join('');
+  }
+  // BID button
+  const btn=el('big-btn'),sub=el('bid-sub');
+  if(!btn||!sub||!me) return;
+  if(G.phase!=='bidding'||G.paused){
+    btn.disabled=true;
+    btn.textContent=G.paused?'⏸ Paused':G.phase==='sold'?'🔨 SOLD!':G.phase==='unsold'?'❌ Unsold':'⏳ Waiting...';
+    btn.className='big-btn';sub.textContent='';sub.className='bid-sub';return;
+  }
+  const iLead=G.bidder===myTid;
+  const nb=G.bidder?G.bid+inc(G.bid):p.b;
+  const{ok,reason}=canBid(me,p);
+  btn.disabled=!ok||iLead;
+  if(iLead){
+    btn.textContent=`🏆 You Lead — ${F(G.bid)}`;btn.className='big-btn lead-btn';
+    sub.textContent='Defend your bid! Opponents bidding...';sub.className='bid-sub yl';
+  } else if(!ok){
+    btn.textContent=reason||'Cannot Bid';btn.className='big-btn';
+    sub.textContent='';sub.className='bid-sub';
+  } else {
+    btn.textContent=`🔔 BID  ${F(nb)}`;btn.className='big-btn';
+    sub.textContent=`Purse left: ${F(me.purse-nb)} after this`;sub.className='bid-sub';
+  }
+  renderSquadsTab();renderUnsoldTab();renderPurseTab();renderWatchTab();
+}
+function switchTab(tab){
+  document.querySelectorAll('.bid-tab').forEach((t,i)=>{
+    const names=['live','squads','unsold','purse','watch'];
+    t.classList.toggle('active',names[i]===tab);
+  });
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  el('tab-'+tab).classList.add('active');
+  if(tab==='squads') renderSquadsTab();
+  if(tab==='unsold') renderUnsoldTab();
+  if(tab==='purse') renderPurseTab();
+  if(tab==='watch') renderWatchTab();
+}
+function renderSquadsTab(){
+  el('b-squads-content').innerHTML=G.teams.map(t=>{
+    const r=getRules(t);
+    const rows=t.players.map(p=>`<div class="sp-row">
+      <div><div class="sp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div><div class="sp-r"><span class="r-${p.r}" style="padding:1px 4px;border-radius:3px;font-size:.58rem;font-weight:700">${RL(p.r)}</span> · ${p.c}</div></div>
+      <div class="sp-p">${F(p.sp)}</div>
+    </div>`).join('')||'<div style="color:#444;padding:8px;font-size:.75rem">No players yet</div>';
+    const tags=[
+      `<span class="rb-item ${r.ovFull?'rb-warn':'rb-ok'}" style="font-size:.57rem">${r.ov}/8 OV</span>`,
+      `<span class="rb-item ${r.unOk?'rb-ok':'rb-warn'}" style="font-size:.57rem">${r.un}/${MIN_UNCAPPED} UC</span>`,
+      `<span class="rb-item ${r.tot>=MIN_P?'rb-ok':'rb-warn'}" style="font-size:.57rem">${r.tot} Players</span>`,
+    ].join('');
+    const isMe=t.id===myTid;
+    return`<div class="squad-card" style="border-color:${isMe?t.color+'55':'var(--b1)'}">
+      <div class="squad-hdr" style="background:${t.color}14">
+        <div class="squad-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div>
+        <div><div class="squad-n" style="color:${t.color}">${t.name}${isMe?' (You)':''}</div><div class="squad-m">${t.owner} · ${F(t.purse)} left</div></div>
+      </div>
+      <div class="squad-rules-bar">${tags}</div>
+      <div class="squad-players">${rows}</div>
+    </div>`;
+  }).join('');
+}
+function renderUnsoldTab(){
+  const all=[...G.unsoldList,...G.skippedList];
+  if(!all.length){el('b-unsold-list').innerHTML='<div style="padding:20px;text-align:center;color:#333;font-size:.82rem">No passed/unsold players yet</div>';return;}
+  el('b-unsold-list').innerHTML=all.map(p=>`
+    <div class="unsold-item">
+      <div>
+        <div class="ui-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div>
+        <div class="ui-r"><span class="r-${p.r}" style="padding:1px 4px;border-radius:3px;font-size:.58rem;font-weight:700">${RL(p.r)}</span> · ${p.c} · Base: ${F(p.b)}</div>
+      </div>
+      <span class="ui-s ${p.status}">${p.status==='unsold'?'Unsold':'Skipped'}</span>
+    </div>`).join('');
+}
+function renderPurseTab(){
+  el('b-purse-list').innerHTML=G.teams.slice().sort((a,b)=>b.purse-a.purse).map(t=>{
+    const pct=Math.round(t.purse/PURSE*100);
+    const spent=PURSE-t.purse;
+    const isMe=t.id===myTid;
+    return`<div class="purse-row">
+      <div class="purse-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div>
+      <div class="purse-info">
+        <div class="purse-name">${t.name}${isMe?' (You)':''}</div>
+        <div class="purse-meta">${t.players.length} players · ${F(spent)} spent</div>
+        <div class="purse-bar-bg"><div class="purse-bar-fg" style="width:${pct}%;background:${t.color}"></div></div>
+      </div>
+      <div class="purse-amt" style="color:${t.color}">${F(t.purse)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════ LOBBY ═══════
+function renderLobby(){
+  const total=G.numT;
+  const html=Array.from({length:total},(_,i)=>{
+    const t=G.teams[i];
+    return t
+      ?`<div class="tslot filled"><div class="ts-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div><div class="ts-n">${t.name}</div><div class="ts-o">${t.owner}</div></div>`
+      :`<div class="tslot empty"><div class="ts-ic" style="background:${COLORS[i%COLORS.length]};opacity:.25">${i+1}</div><div class="ts-n" style="color:#444">Waiting...</div></div>`;
+  }).join('');
+  el('lob-grid').innerHTML=html;
+  const ready=G.teams.length>=total;
+  el('lob-start').disabled=!ready;
+  el('lob-msg').textContent=ready?'All teams ready! 🎉':`${total-G.teams.length} more bidder(s) needed`;
+}
+function copyRoomCode(){
+  navigator.clipboard?.writeText(roomCode).then(()=>toast('✅ Room code copied!')).catch(()=>toast('Code: '+roomCode));
+}
+
+// ═══════ OVERLAYS ═══════
+function showOvSold(){
+  document.querySelector('.ov')?.remove();
+  const p=G.Q[G.idx],t=G.teams.find(t=>t.id===G.bidder);if(!p||!t) return;
+  const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<div class="ov-c">
+    <div class="ov-sold">SOLD!</div>
+    <div class="ov-name">${p.n}</div>
+    <div class="ov-to">to <strong style="color:${t.color}">${t.name}</strong></div>
+    <div class="ov-price">${F(G.bid)}</div>
+    <div class="ov-reactions">🎉🔥🏏</div>
+  </div>`;
+  document.body.appendChild(d);
+  // Random emoji burst
+  ['🔥','💰','🏏','👏','😮'].forEach((e,i)=>setTimeout(()=>floatEmoji(e),i*180));
+}
+function showOvUnsold(){
+  document.querySelector('.ov')?.remove();
+  const p=G.Q[G.idx];
+  const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<div class="ov-c"><div class="ov-un">UNSOLD</div><div class="ov-name" style="color:#888">${p?.n||''}</div><div style="font-size:.82rem;color:#555;margin-top:8px">Will be re-listed at end</div></div>`;
+  document.body.appendChild(d);
+}
+function addLog(p,t,price){
+  const log=el('h-log');if(!log) return;
+  const d=document.createElement('div');d.className='le'+(t?'':' un');
+  d.innerHTML=t
+    ?`<div class="le-n">${p.n}</div><div class="le-t" style="color:${t.color}">→ ${t.name}</div><div class="le-p">${F(price)}</div>`
+    :`<div class="le-n">${p?.n||'?'}</div><div style="color:#f44;font-size:.65rem">❌ Unsold — will re-list</div>`;
+  log.insertBefore(d,log.firstChild);
+}
+function floatEmoji(emoji){
+  const d=document.createElement('div');d.className='emoji-float';d.textContent=emoji;
+  d.style.left=Math.random()*80+10+'vw';d.style.bottom='20vh';
+  document.body.appendChild(d);setTimeout(()=>d.remove(),2100);
+}
+
+// ═══════ RESULTS ═══════
+function renderRes(){
+  const ts=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  setT('res-sub',`IPL 2025 Auction Results · ${ts}`);
+  el('res-grid').innerHTML=G.teams.map(t=>{
+    const spent=PURSE-t.purse;const r=getRules(t);
+    const rows=t.players.map(p=>`<div class="rp">
+      <div><div class="rp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div><div class="rp-r r-${p.r}">${RL(p.r)} · ${p.c}${p.overseas?' 🌍':''}${!p.cap&&!p.overseas?' 🔓':''}</div></div>
+      <div class="rp-p">${F(p.sp)}</div>
+    </div>`).join('')||'<div style="color:#444;padding:8px;font-size:.8rem">No players</div>';
+    const tags=[
+      `<span class="tag ${r.ovFull?'tag-warn':'tag-ok'}">${r.ov}/8 Overseas</span>`,
+      `<span class="tag ${r.unOk?'tag-ok':'tag-err'}">${r.un}/${MIN_UNCAPPED} Uncapped</span>`,
+      `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-err'}">${r.tot} Players</span>`,
+    ].join('');
+    return`<div class="rc"><div class="rc-hdr" style="background:${t.color}15;border-bottom:2px solid ${t.color}33">
+      <div class="rc-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div>
+      <div><div class="rc-n" style="color:${t.color}">${t.name}</div><div class="rc-m">${t.owner} · ${t.players.length} players · ${F(spent)} spent</div></div></div>
+      <div class="rc-rules-summary">${tags}</div>
+      <div class="rc-players">${rows}</div>
+      <div class="rc-foot">Remaining: <span>${F(t.purse)}</span></div></div>`;
+  }).join('');
+}
+function exportResults(){
+  let txt=`IPL 2025 AUCTION RESULTS\n${'='.repeat(40)}\n\n`;
+  G.teams.forEach(t=>{
+    txt+=`${t.name} (${t.owner})\nSpent: ${F(PURSE-t.purse)} | Remaining: ${F(t.purse)}\n`;
+    t.players.forEach(p=>txt+=`  • ${p.n} (${RL(p.r)}) — ${F(p.sp)}\n`);
+    txt+='\n';
+  });
+  navigator.clipboard?.writeText(txt).then(()=>toast('📋 Results copied to clipboard!')).catch(()=>toast('Copy failed'));
+}
+function exportCSV(){
+  let csv='Team,Owner,Player,Role,Nation,Price (Lakhs),Overseas,Capped\n';
+  G.teams.forEach(t=>{
+    t.players.forEach(p=>{
+      csv+=`"${t.name}","${t.owner}","${p.n}","${RL(p.r)}","${p.c}",${p.sp},${p.overseas?'Yes':'No'},${p.cap?'Yes':'No'}\n`;
+    });
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='ipl-auction-results.csv';a.click();
+  toast('⬇️ CSV downloaded!');
+}
+
+// ═══════ UTILS ═══════
+function inc(b){return b<100?5:b<200?10:b<500?25:b<1000?50:100;}
+function F(l){return l>=100?`₹${(l/100).toFixed(l%100===0?0:2)} Cr`:`₹${l} L`;}
+function RL(r){return{BAT:'Batsman',BOWL:'Bowler',AR:'All-Rounder',WK:'Wicket-Keeper'}[r]||r;}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));el(id)?.classList.add('on');}
+function el(id){return document.getElementById(id);}
+function v(id){return(el(id)?.value||'').trim();}
+function setT(id,t){const e=el(id);if(e)e.textContent=t;}
+function rndCode(){return Math.random().toString(36).substring(2,8).toUpperCase();}
+function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),3200);}
+function fmtTime(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
