@@ -823,23 +823,83 @@ const PURSE=12000,MAX_P=25,MIN_P=18,MAX_OVERSEAS=8,MIN_UNCAPPED=7,MIN_R=5,SECS=3
 const C76=194.8,C62=163.4;
 
 // ═══════ STATE ═══════
+const STORE_KEY='ipl-auction-session-v2';
 let amHost=false, myTid='', myName='', myTeamName='', roomCode='';
-let hostPeer=null, bidderConn=null, bidderConns={};
+let hostPeer=null, bidderPeer=null, bidderConn=null, bidderConns={};
 let tickId=null, ovShown=false, pauseTs=0;
 let pickFilter='all';
 let chatOpen=false;
 let unreadChat=0;
 let myWatchlist=new Set(); // player ids
 let bidHistory=[]; // [{team,amt,ts}]
+let auctionLog=[]; // persisted host log
 let pendingPauseReq=null; // {peerId, teamName}
 let pauseReqSent=false;
 let chatMessages=[]; // [{sender,text,ts,isSystem,isEmoji}]
 let myDisplayName='Host';
+let reconnectTimer=null;
+let suppressAutoRestore=false;
 
 // ═══════ GLOBAL STATE ═══════
 let G={teams:[],Q:[],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,ts:Date.now(),
        phase:'lobby',sold:0,unsold:0,skipped:0,numT:2,paused:false,pauseRem:SECS,relisted:false,
        chat:[] };
+
+function persistSession(){
+  try{
+    localStorage.setItem(STORE_KEY,JSON.stringify({
+      amHost,roomCode,myTid,myName,myTeamName,myDisplayName,
+      G,bidHistory,auctionLog,watchlist:[...myWatchlist],savedAt:Date.now()
+    }));
+  }catch(e){}
+}
+function clearSession(){
+  try{localStorage.removeItem(STORE_KEY);}catch(e){}
+}
+function loadSession(){
+  try{return JSON.parse(localStorage.getItem(STORE_KEY)||'null');}catch(e){return null;}
+}
+function setupFreshAuction(num){
+  const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort(()=>Math.random()-.5);
+  G={teams:[],Q:[...mq,...rest],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
+     ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,chat:[]};
+  bidHistory=[];auctionLog=[];unreadChat=0;pendingPauseReq=null;
+  persistSession();
+}
+function hydrateFromSnapshot(s){
+  amHost=!!s.amHost;roomCode=s.roomCode||'';myTid=s.myTid||'';myName=s.myName||'';myTeamName=s.myTeamName||'';
+  myDisplayName=s.myDisplayName||(amHost?'Host':myTeamName||'Bidder');
+  G=s.G||G;bidHistory=Array.isArray(s.bidHistory)?s.bidHistory:[];auctionLog=Array.isArray(s.auctionLog)?s.auctionLog:[];
+  myWatchlist=new Set(Array.isArray(s.watchlist)?s.watchlist:[]);
+}
+function renderRecoveredScreen(){
+  if(amHost){
+    el('lob-code').textContent=roomCode;el('lob-title').textContent='Room '+roomCode;el('hdr-room').textContent=roomCode;
+    if(G.phase==='lobby'){go('pg-lobby');renderLobby();}
+    else if(G.phase==='done'){go('pg-res');renderRes();}
+    else{go('pg-host');renderHostUI();renderBidHist();renderHostLog();if(G.phase==='bidding'&&!G.paused) startTick();}
+  }else{
+    if(myTeamName) el('b-tname').textContent=myTeamName;
+    go(G.phase==='done'?'pg-res':'pg-bid');
+    if(G.phase==='done') renderRes(); else renderBidderUI();
+  }
+}
+function maybeRestoreSession(){
+  if(suppressAutoRestore) return;
+  const s=loadSession();
+  if(!s||!s.roomCode) return;
+  hydrateFromSnapshot(s);
+  const msg=amHost
+    ? `Resume previous hosted room ${roomCode} from where you left off?`
+    : `Reconnect to room ${roomCode} as ${myTeamName}?`;
+  if(confirm(msg)){
+    if(amHost) recoverHostSession();
+    else recoverBidderSession();
+  } else {
+    clearSession();
+    amHost=false;myTid='';myName='';myTeamName='';roomCode='';myDisplayName='Host';G.phase='lobby';
+  }
+}
 
 // ═══════ RESTRICTION CHECKER ═══════
 function getRules(t){
@@ -879,36 +939,48 @@ function playTimer(){beep(440,60,0.08,'square');}
 function playChat(){beep(600,80,0.08,'sine');}
 
 // ═══════ HOST PEERJS ═══════
+function setupHostPeer(peerId,onReady,onUnavailable){
+  if(hostPeer) try{hostPeer.destroy();}catch(e){}
+  hostPeer=new Peer(peerId,{debug:0});
+  hostPeer.on('open',onReady);
+  hostPeer.on('error',e=>{
+    el('host-connecting').classList.remove('show');el('host-btn').disabled=false;
+    if(e.type==='unavailable-id'){onUnavailable?onUnavailable():toast('Room ID busy. Try again in a moment.');}
+    else toast('Connection error: '+e.type+'. Try again.');
+  });
+  hostPeer.on('connection',conn=>{
+    conn.on('open',()=>{bidderConns[conn.peer]=conn;conn.send({type:'STATE',G});updateConnCount();persistSession();});
+    conn.on('data',msg=>handleBidderMsg(conn,msg));
+    conn.on('close',()=>{
+      const t=G.teams.find(t=>t.id===conn.peer);
+      delete bidderConns[conn.peer];updateConnCount();renderLobby();persistSession();
+      if(t) systemChat(`${t.name} disconnected`);
+    });
+    conn.on('error',()=>{delete bidderConns[conn.peer];updateConnCount();persistSession();});
+  });
+}
 function doHost(){
   const num=+el('h-num').value;
   el('host-btn').disabled=true;el('host-connecting').classList.add('show');
   roomCode=rndCode();amHost=true;myDisplayName='Host';
   const peerId='iplauc-'+roomCode;
-  hostPeer=new Peer(peerId,{debug:0});
-  hostPeer.on('open',()=>{
+  setupHostPeer(peerId,()=>{
     el('host-connecting').classList.remove('show');el('host-btn').disabled=false;
-    const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort(()=>Math.random()-.5);
-    G={teams:[],Q:[...mq,...rest],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
-       ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,chat:[]};
+    setupFreshAuction(num);
     go('pg-lobby');
     el('lob-code').textContent=roomCode;el('lob-title').textContent='Room '+roomCode;
     el('hdr-room').textContent=roomCode;renderLobby();
-  });
-  hostPeer.on('error',e=>{
+  },()=>{toast('Retrying room code...');setTimeout(doHost,500);});
+}
+function recoverHostSession(){
+  if(!roomCode){toast('No saved host room found');return;}
+  amHost=true;myDisplayName='Host';bidderConns={};
+  el('host-btn').disabled=true;el('host-connecting').classList.add('show');
+  setupHostPeer('iplauc-'+roomCode,()=>{
     el('host-connecting').classList.remove('show');el('host-btn').disabled=false;
-    if(e.type==='unavailable-id'){toast('Retrying room code...');setTimeout(doHost,500);}
-    else toast('Connection error: '+e.type+'. Try again.');
-  });
-  hostPeer.on('connection',conn=>{
-    conn.on('open',()=>{bidderConns[conn.peer]=conn;conn.send({type:'STATE',G});updateConnCount();});
-    conn.on('data',msg=>handleBidderMsg(conn,msg));
-    conn.on('close',()=>{
-      const t=G.teams.find(t=>t.id===conn.peer);
-      delete bidderConns[conn.peer];updateConnCount();renderLobby();
-      if(t) systemChat(`${t.name} disconnected`);
-    });
-    conn.on('error',()=>{delete bidderConns[conn.peer];updateConnCount();});
-  });
+    renderRecoveredScreen();persistSession();
+    toast(`Recovered room ${roomCode}`);
+  },()=>{toast('Saved room is still shutting down. Retrying...');setTimeout(recoverHostSession,1200);});
 }
 function updateConnCount(){
   const n=Object.keys(bidderConns).length;
@@ -963,49 +1035,67 @@ function handleBidderMsg(conn,msg){
 }
 function broadcast(){
   Object.values(bidderConns).forEach(c=>{try{c.send({type:'STATE',G});}catch(e){}});
+  persistSession();
   if(G.phase==='lobby') renderLobby(); else renderHostUI();
 }
 
 // ═══════ BIDDER PEERJS ═══════
+function attachBidderConnHandlers(code){
+  bidderConn=bidderPeer.connect('iplauc-'+code,{reliable:true});
+  bidderConn.on('open',()=>{
+    clearTimeout(reconnectTimer);reconnectTimer=null;
+    el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
+    bidderConn.send({type:'JOIN',name:myTeamName,owner:myName});
+    go('pg-bid');el('b-tname').textContent=myTeamName;
+    el('conn-status').textContent='● Connected to host';el('conn-status').className='conn-status ok';
+    el('bchat-fab').style.display='flex';
+    persistSession();
+  });
+  bidderConn.on('data',msg=>{
+    if(msg.type==='STATE'){
+      const prevBidder=G.bidder;
+      G=msg.G;renderBidderUI();persistSession();
+      if(G.bidder&&G.bidder!==prevBidder) playBid();
+      if(G.phase==='bidding'&&!G.paused) startTick(); else clearInterval(tickId);
+      if(G.phase==='sold'&&!ovShown){ovShown=true;showOvSold();playSold();}
+      if(G.phase==='unsold'&&!ovShown){ovShown=true;showOvUnsold();playUnsold();}
+      if(G.phase!=='sold'&&G.phase!=='unsold'){ovShown=false;document.querySelector('.ov')?.remove();}
+      if(G.phase==='done'){clearInterval(tickId);go('pg-res');renderRes();}
+      syncBidderChat();
+    }
+  });
+  bidderConn.on('close',scheduleReconnect);
+  bidderConn.on('error',scheduleReconnect);
+}
+function scheduleReconnect(){
+  el('conn-status').textContent='● Reconnecting to host...';el('conn-status').className='conn-status bad';
+  if(reconnectTimer||!bidderPeer||!roomCode) return;
+  reconnectTimer=setTimeout(()=>{
+    reconnectTimer=null;
+    try{attachBidderConnHandlers(roomCode);}catch(e){scheduleReconnect();}
+  },2000);
+}
 function doJoin(){
   const name=v('j-name'),team=v('j-team'),code=v('j-code').toUpperCase();
   if(!name||!team||!code||code.length<6){toast('Fill all fields and enter the 6-digit code');return;}
   el('join-btn').disabled=true;el('join-connecting').classList.add('show');
   roomCode=code;amHost=false;myName=name;myTeamName=team;myDisplayName=team;
-  const myPeerId='bidder-'+Math.random().toString(36).substring(2,10);
-  const bidderPeer=new Peer(myPeerId,{debug:0});
+  myTid=myTid||('bidder-'+Math.random().toString(36).substring(2,10));
+  if(bidderPeer) try{bidderPeer.destroy();}catch(e){}
+  bidderPeer=new Peer(myTid,{debug:0});
   bidderPeer.on('open',()=>{
-    bidderConn=bidderPeer.connect('iplauc-'+code,{reliable:true});
-    bidderConn.on('open',()=>{
-      el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
-      myTid=myPeerId;
-      bidderConn.send({type:'JOIN',name:team,owner:name});
-      go('pg-bid');el('b-tname').textContent=team;
-      el('conn-status').textContent='● Connected to host';el('conn-status').className='conn-status ok';
-      el('bchat-fab').style.display='flex';
-    });
-    bidderConn.on('data',msg=>{
-      if(msg.type==='STATE'){
-        const prevBidder=G.bidder;
-        G=msg.G;renderBidderUI();
-        if(G.bidder&&G.bidder!==prevBidder) playBid();
-        if(G.phase==='bidding'&&!G.paused) startTick(); else clearInterval(tickId);
-        if(G.phase==='sold'&&!ovShown){ovShown=true;showOvSold();playSold();}
-        if(G.phase==='unsold'&&!ovShown){ovShown=true;showOvUnsold();playUnsold();}
-        if(G.phase!=='sold'&&G.phase!=='unsold'){ovShown=false;document.querySelector('.ov')?.remove();}
-        if(G.phase==='done'){clearInterval(tickId);go('pg-res');renderRes();}
-        // sync chat
-        syncBidderChat();
-      }
-    });
-    bidderConn.on('close',()=>{el('conn-status').textContent='● Disconnected — refresh to reconnect';el('conn-status').className='conn-status bad';});
-    bidderConn.on('error',()=>{el('conn-status').textContent='● Connection error';el('conn-status').className='conn-status bad';});
+    attachBidderConnHandlers(code);
   });
   bidderPeer.on('error',e=>{
     el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
     if(e.type==='peer-unavailable') toast('❌ Room "'+code+'" not found. Check the code and make sure host is online.');
     else toast('Error: '+e.type);
   });
+}
+function recoverBidderSession(){
+  if(!roomCode||!myName||!myTeamName){toast('No saved bidder session found');return;}
+  el('j-name').value=myName;el('j-team').value=myTeamName;el('j-code').value=roomCode;
+  doJoin();
 }
 function doBid(){if(!bidderConn||G.phase!=='bidding'||G.paused) return;bidderConn.send({type:'BID'});}
 
@@ -1171,6 +1261,7 @@ function updateChatBadge(){
 function toggleWatch(pid){
   if(myWatchlist.has(pid)) myWatchlist.delete(pid);
   else myWatchlist.add(pid);
+  persistSession();
   renderWatchTab();
   updateWatchBadge();
   const btn=document.getElementById('wb-'+pid);
@@ -1373,6 +1464,7 @@ function setTimerUI(val){
 function renderHostUI(){
   setT('hs-sold',G.sold);setT('hs-un',G.unsold);setT('hs-sk',G.skipped);
   setT('hs-rem',Math.max(0,G.Q.length-G.idx));
+  renderBidHist();renderHostLog();
   if(G.paused){
     el('pause-btn').textContent='▶ Resume';el('pause-btn').classList.add('paused');
     el('h-pause-banner').classList.add('show');
@@ -1623,12 +1715,9 @@ function showOvUnsold(){
   document.body.appendChild(d);
 }
 function addLog(p,t,price){
-  const log=el('h-log');if(!log) return;
-  const d=document.createElement('div');d.className='le'+(t?'':' un');
-  d.innerHTML=t
-    ?`<div class="le-n">${p.n}</div><div class="le-t" style="color:${t.color}">→ ${t.name}</div><div class="le-p">${F(price)}</div>`
-    :`<div class="le-n">${p?.n||'?'}</div><div style="color:#f44;font-size:.65rem">❌ Unsold — will re-list</div>`;
-  log.insertBefore(d,log.firstChild);
+  auctionLog.unshift({pid:p?.id||0,pn:p?.n||'?',tid:t?.id||'',tname:t?.name||'',tcolor:t?.color||'',price,unsold:!t});
+  if(auctionLog.length>50) auctionLog.pop();
+  renderHostLog();persistSession();
 }
 function floatEmoji(emoji){
   const d=document.createElement('div');d.className='emoji-float';d.textContent=emoji;
@@ -1680,6 +1769,14 @@ function exportCSV(){
   a.download='ipl-auction-results.csv';a.click();
   toast('⬇️ CSV downloaded!');
 }
+function renderHostLog(){
+  const log=el('h-log');if(!log) return;
+  if(!auctionLog.length){log.innerHTML='';return;}
+  log.innerHTML=auctionLog.map(item=>item.unsold
+    ?`<div class="le un"><div class="le-n">${item.pn}</div><div style="color:#f44;font-size:.65rem">❌ Unsold — will re-list</div></div>`
+    :`<div class="le"><div class="le-n">${item.pn}</div><div class="le-t" style="color:${item.tcolor}">→ ${item.tname}</div><div class="le-p">${F(item.price)}</div></div>`
+  ).join('');
+}
 
 // ═══════ UTILS ═══════
 function inc(b){return b<100?5:b<200?10:b<500?25:b<1000?50:100;}
@@ -1693,6 +1790,8 @@ function rndCode(){return Math.random().toString(36).substring(2,8).toUpperCase(
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),3200);}
 function fmtTime(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+window.addEventListener('beforeunload',persistSession);
+maybeRestoreSession();
 </script>
 </body>
 </html>
