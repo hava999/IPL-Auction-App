@@ -420,14 +420,119 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:3px}
 @media(max-width:700px){.hgrid{grid-template-columns:1fr}.side{display:none}.chat-panel{width:100%;top:0}}
+
+/* ══ RESUME BANNER ══ */
+#resume-banner{background:linear-gradient(135deg,rgba(255,215,0,.09),rgba(255,107,0,.06));border:1px solid rgba(255,215,0,.35);border-radius:16px;padding:18px 20px;width:100%;max-width:440px;margin-bottom:16px;animation:fi .4s}
+.rb-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.rb-icon-wrap{font-size:1.8rem;line-height:1;flex-shrink:0}
+.rb-head{font-size:.95rem;font-weight:800;color:var(--g);margin-bottom:4px}
+.rb-meta{font-size:.76rem;color:#999;line-height:1.6}
+.rb-meta strong{color:#ddd}
+.rb-btns{display:flex;gap:8px}
+.rb-resume{flex:1;padding:12px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--g),var(--o));color:#000;font-weight:800;font-size:.9rem;cursor:pointer;transition:all .2s}
+.rb-resume:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(255,215,0,.35)}
+.rb-fresh{flex:1;padding:12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:none;color:#777;font-size:.85rem;cursor:pointer;transition:all .2s}
+.rb-fresh:hover{background:rgba(255,255,255,.06);color:#aaa}
+
+/* ══ LANDING UPGRADES ══ */
+.logo-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.2);border-radius:20px;padding:4px 14px;font-size:.7rem;color:rgba(255,215,0,.75);margin-bottom:20px;font-weight:700;letter-spacing:.5px}
+.team-presets{display:flex;gap:5px;flex-wrap:wrap;margin:-2px 0 10px}
+.tp-btn{border:1px solid rgba(255,255,255,.1);background:none;border-radius:8px;padding:4px 9px;font-size:.68rem;font-weight:700;cursor:pointer;color:#666;transition:all .15s}
+.tp-btn:hover{background:rgba(255,255,255,.07);color:#ccc;border-color:rgba(255,255,255,.2)}
+.field-hint{font-size:.65rem;color:#555;margin-top:3px;text-align:right}
+
+/* ══ BID ANIMATIONS ══ */
+@keyframes bidPulse{0%,100%{box-shadow:0 8px 28px rgba(255,215,0,.25)}50%{box-shadow:0 12px 44px rgba(255,215,0,.6),0 0 0 10px rgba(255,215,0,.07)}}
+.big-btn.pulsing:not(:disabled){animation:bidPulse 1.3s ease-in-out infinite}
+@keyframes leadPulse{0%,100%{box-shadow:0 8px 28px rgba(0,200,81,.2)}50%{box-shadow:0 12px 44px rgba(0,200,81,.55),0 0 0 10px rgba(0,200,81,.06)}}
+.big-btn.lead-btn.pulsing:not(:disabled){animation:leadPulse 1.3s ease-in-out infinite}
+@keyframes numFlash{0%{transform:scale(1.18);color:#fff;text-shadow:0 0 20px rgba(255,215,0,.9)}70%{transform:scale(1.05)}100%{transform:scale(1);text-shadow:none}}
+.bb-amt.flash,.bc-amt.flash{animation:numFlash .45s ease-out}
+@keyframes boxFlash{0%{background:rgba(255,215,0,.18);border-color:rgba(255,215,0,.5)}100%{background:rgba(255,215,0,.05);border-color:rgba(255,215,0,.2)}}
+.bid-box.flash,.bid-cur.flash{animation:boxFlash .6s ease-out}
+
+/* ══ TIMER URGENCY ══ */
+@keyframes timerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.t-ring.urgent .t-num{animation:timerPulse .45s ease-in-out infinite}
+.bid-t-ring.urgent .t-num{animation:timerPulse .45s ease-in-out infinite}
+
+/* ══ SOLD OVERLAY UPGRADE ══ */
+@keyframes gavelDrop{0%{transform:rotate(-55deg) scale(.5) translateX(-10px);opacity:0}55%{transform:rotate(12deg) scale(1.15)}75%{transform:rotate(-6deg) scale(1)}90%{transform:rotate(3deg)}100%{transform:rotate(0deg) scale(1);opacity:1}}
+.ov-gavel{display:inline-block;font-size:4.5rem;animation:gavelDrop .65s cubic-bezier(.25,.46,.45,.94) forwards;margin-bottom:6px;line-height:1}
+@keyframes soldPop{0%{transform:scale(0) rotate(-8deg);opacity:0}65%{transform:scale(1.18) rotate(2deg)}85%{transform:scale(.96)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+.ov-sold{animation:soldPop .55s .25s cubic-bezier(.175,.885,.32,1.275) both}
+@keyframes priceIn{0%{transform:translateY(12px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.ov-price{animation:priceIn .4s .5s both}
+
+/* ══ CONFETTI ══ */
+.cf{position:fixed;pointer-events:none;z-index:1600;border-radius:2px;animation:cfFall linear forwards}
+@keyframes cfFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(105vh) rotate(740deg)}}
+
+/* ══ CONNECTION STATUS ══ */
+.conn-status{display:flex;align-items:center;gap:5px;font-size:.68rem}
+.conn-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.conn-status.ok{color:var(--gr)}
+.conn-status.ok .conn-dot{background:#00C851;animation:blink 2s infinite}
+.conn-status.bad{color:var(--rd)}
+.conn-status.bad .conn-dot{background:#ff3b30;animation:blink .5s infinite}
+
+/* ══ PLAYER CARD SHIMMER ══ */
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+.stage::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,215,0,.04),transparent);background-size:200% auto;animation:shimmer 4s linear infinite;pointer-events:none;border-radius:16px}
+
+/* ══ LOBBY TEAM JOIN ANIM ══ */
+@keyframes teamSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tslot.filled{animation:teamSlide .3s ease-out}
+
+/* ══ IMPROVED TOAST ══ */
+.toast{border-radius:14px;font-weight:600;box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(255,215,0,.12);letter-spacing:.2px}
+
+/* ══ PLAYER PHOTO ══ */
+.pphoto-wrap{position:relative;width:88px;height:88px;margin:0 auto 10px;flex-shrink:0}
+.pphoto{width:88px;height:88px;border-radius:50%;object-fit:cover;border:2.5px solid rgba(255,215,0,.35);display:block;background:#0e0e28}
+.pphoto-sm{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,215,0,.25);display:block;background:#0e0e28}
+.pphoto-avatar{width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:900;color:#000;margin:0 auto 10px;border:2.5px solid rgba(255,215,0,.25)}
+.pphoto-avatar-sm{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;color:#000;flex-shrink:0;border:2px solid rgba(255,215,0,.2)}
+.profile-photo-lg{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,215,0,.3);display:block;margin:0 auto 12px;background:#0e0e28}
+.profile-photo-lg-av{width:100px;height:100px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;font-weight:900;color:#000;margin:0 auto 12px;border:3px solid rgba(255,215,0,.2)}
+
+/* ══ BIDDER LOBBY WAIT ══ */
+#bidder-lobby-wait{position:absolute;inset:0;z-index:20;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;animation:fi .3s}
+.blw-pulse{width:72px;height:72px;border-radius:50%;border:3px solid rgba(255,215,0,.3);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px;animation:lobbyPulse 2s ease-in-out infinite}
+@keyframes lobbyPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.2)}50%{box-shadow:0 0 0 16px rgba(255,215,0,0)}}
+.blw-title{font-size:1.2rem;font-weight:900;color:var(--g);margin-bottom:6px}
+.blw-sub{font-size:.8rem;color:#888;line-height:1.6;margin-bottom:20px}
+.blw-teams{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:360px}
+.blw-team-chip{padding:5px 12px;border-radius:20px;font-size:.72rem;font-weight:700;border:1px solid rgba(255,255,255,.12);color:#ccc}
+
+/* ══ GENERAL POLISH ══ */
+.card{transition:transform .15s}
+.card:focus-within{transform:translateY(-1px)}
+.f input:not(:placeholder-shown){border-color:rgba(255,215,0,.3)}
 </style>
 </head>
 <body>
 
 <!-- LANDING -->
 <div id="pg-land" class="screen on">
-  <div class="logo">🏏 IPL 2025 AUCTION</div>
-  <div class="logo-sub">Real-time multiplayer · Official rules · Cross-device</div>
+  <div class="logo">🏏 IPL AUCTION</div>
+  <div class="logo-badge">🔴 LIVE · Real-time Multiplayer · 2025/26 Pool</div>
+
+  <!-- RESUME BANNER (shown by JS when saved session exists) -->
+  <div id="resume-banner" style="display:none">
+    <div class="rb-row">
+      <div class="rb-icon-wrap">💾</div>
+      <div>
+        <div class="rb-head">Saved Session Found</div>
+        <div class="rb-meta" id="rb-meta-text">Previous session detected. Resume from where you left off?</div>
+      </div>
+    </div>
+    <div class="rb-btns">
+      <button class="rb-resume" onclick="confirmResume()">⚡ Resume Session</button>
+      <button class="rb-fresh" onclick="dismissResume()">Start Fresh</button>
+    </div>
+  </div>
+
   <div class="card">
     <h2>🎤 Host the Auction</h2>
     <div class="info-box">Host is the <strong>auctioneer only</strong> — you control the auction, call SOLD/Unsold, manage the flow. You do <strong>not</strong> bid or have a team.<br>
@@ -443,9 +548,31 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
   </div>
   <div class="card">
     <h2>🏏 Join as Bidder</h2>
-    <div class="f"><label>Your Name</label><input id="j-name" placeholder="e.g. Rahul" maxlength="20"></div>
-    <div class="f"><label>Your Team Name</label><input id="j-team" placeholder="e.g. Chennai Super Kings" maxlength="28"></div>
-    <div class="f"><label>Room Code (from host)</label><input class="big-code" id="j-code" placeholder="ABC123" maxlength="6" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="f">
+      <label>Your Name</label>
+      <input id="j-name" placeholder="e.g. Rahul" maxlength="20">
+    </div>
+    <div class="f">
+      <label>Your Team Name</label>
+      <div class="team-presets">
+        <button class="tp-btn" onclick="setTeam('Mumbai Indians')">MI</button>
+        <button class="tp-btn" onclick="setTeam('Chennai Super Kings')">CSK</button>
+        <button class="tp-btn" onclick="setTeam('Royal Challengers')">RCB</button>
+        <button class="tp-btn" onclick="setTeam('Kolkata Knight Riders')">KKR</button>
+        <button class="tp-btn" onclick="setTeam('Delhi Capitals')">DC</button>
+        <button class="tp-btn" onclick="setTeam('Punjab Kings')">PBKS</button>
+        <button class="tp-btn" onclick="setTeam('Rajasthan Royals')">RR</button>
+        <button class="tp-btn" onclick="setTeam('Sunrisers Hyderabad')">SRH</button>
+        <button class="tp-btn" onclick="setTeam('Lucknow Super Giants')">LSG</button>
+        <button class="tp-btn" onclick="setTeam('Gujarat Titans')">GT</button>
+      </div>
+      <input id="j-team" placeholder="or type custom team name" maxlength="28">
+    </div>
+    <div class="f">
+      <label>Room Code (from host)</label>
+      <input class="big-code" id="j-code" placeholder="ABC123" maxlength="6" oninput="this.value=this.value.toUpperCase()">
+      <div class="field-hint">6-character code shared by the host</div>
+    </div>
     <button class="btn btn-g" id="join-btn" onclick="doJoin()">Join Room →</button>
     <div class="connecting-msg" id="join-connecting"><span class="spin">⏳</span> Connecting to host...</div>
   </div>
@@ -498,7 +625,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
       <button class="hdr-btn" onclick="openPickModal()">🔀 Pick Player</button>
       <button class="hdr-btn hdr-chat-btn" id="h-chat-btn" onclick="toggleHostChat()">💬 Chat<span class="chat-badge" id="h-chat-badge">0</span></button>
       <button class="hdr-btn" onclick="go('pg-res');renderRes()">📊 Results</button>
-      <button class="hdr-btn danger" onclick="if(confirm('End auction for all?')){G.phase=\'done\';broadcast();go(\'pg-res\');renderRes();}">🏁 End</button>
+      <button class="hdr-btn" onclick="resetAuction()" style="border-color:rgba(100,150,255,.4);color:#99aaff">🔄 Reset</button>
+      <button class="hdr-btn danger" onclick="if(confirm('End auction for all?')){G.phase='done';broadcast();go('pg-res');renderRes();}">🏁 End</button>
     </div>
     <div class="side left">
       <div class="pl">Franchises</div>
@@ -525,7 +653,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
           </div>
           <div class="t-lbl">seconds</div>
         </div>
-        <div class="bid-box">
+        <div class="bid-box" id="bid-box-wrap">
           <div class="bb-lbl">Current Bid</div>
           <div class="bb-amt" id="h-amt">—</div>
           <div class="bb-who" id="h-who">No bids yet</div>
@@ -579,7 +707,14 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
 
 <!-- BIDDER SCREEN -->
 <div id="pg-bid" class="screen">
-  <div class="bid-wrap">
+  <!-- Lobby waiting overlay — shown before host starts, hidden once auction begins -->
+  <div id="bidder-lobby-wait" style="display:none">
+    <div class="blw-pulse">🏏</div>
+    <div class="blw-title">Waiting for Host to Start</div>
+    <div class="blw-sub" id="blw-sub-text">You're in the room! The host will start the auction shortly.</div>
+    <div class="blw-teams" id="blw-teams"></div>
+  </div>
+  <div class="bid-wrap" style="position:relative">
     <div class="bid-top">
       <div class="bid-top-logo">🏏 IPL</div>
       <div class="bid-top-team" id="b-tname">My Team</div>
@@ -600,6 +735,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
       <div class="bid-pause-msg" id="b-pause-msg">⏸ AUCTION PAUSED by host — please wait</div>
       <div class="bid-player">
         <div class="bid-lot" id="b-lot">Waiting...</div>
+        <div id="b-photo-wrap" style="margin:6px auto 8px;width:72px"></div>
         <div class="bid-pn" id="b-pn">—</div>
         <span class="bid-pr" id="b-pr">—</span>
         <div class="bid-pmeta" id="b-pmeta"></div>
@@ -613,7 +749,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
           </svg>
           <div class="t-num" id="b-tnum" style="font-size:1.25rem">30</div>
         </div>
-        <div class="bid-cur">
+        <div class="bid-cur" id="b-cur">
           <div class="bc-lbl">Current Bid</div>
           <div class="bc-amt" id="b-amt">—</div>
           <div class="bc-who" id="b-who">No bids yet</div>
@@ -627,7 +763,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
         <button class="pass-btn" id="pass-btn" onclick="passOnPlayer()" disabled>🙅 Not Interested</button>
         <div class="bid-sub" id="bid-sub"></div>
         <div class="pass-status" id="pass-status"></div>
-        <div class="conn-status ok" id="conn-status">● Connected to host</div>
+        <div class="conn-status ok" id="conn-status"><span class="conn-dot"></span>Connected to host</div>
       </div>
     </div>
     <!-- SQUADS TAB -->
@@ -739,91 +875,91 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:#fff
 // PLAYER DATABASE — 85 players, full IPL 2025/26 pool
 // ═══════════════════════════════════════════════════
 const PL=[
-  {id:1,n:"Rishabh Pant",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:2,n:"Shreyas Iyer",r:"BAT",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:3,n:"KL Rahul",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:4,n:"Jos Buttler",r:"WK",c:"England",b:200,cap:1,mq:1,overseas:1},
-  {id:5,n:"Mitchell Starc",r:"BOWL",c:"Australia",b:200,cap:1,mq:1,overseas:1},
-  {id:6,n:"Arshdeep Singh",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:7,n:"Kagiso Rabada",r:"BOWL",c:"South Africa",b:200,cap:1,mq:1,overseas:1},
-  {id:8,n:"Mohammed Siraj",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:9,n:"Yuzvendra Chahal",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:10,n:"Liam Livingstone",r:"AR",c:"England",b:200,cap:1,mq:1,overseas:1},
-  {id:11,n:"David Miller",r:"BAT",c:"South Africa",b:150,cap:1,mq:1,overseas:1},
-  {id:12,n:"Mohammed Shami",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0},
-  {id:13,n:"Rohit Sharma",r:"BAT",c:"India",b:200,cap:1,overseas:0},
-  {id:14,n:"Virat Kohli",r:"BAT",c:"India",b:200,cap:1,overseas:0},
-  {id:15,n:"MS Dhoni",r:"WK",c:"India",b:200,cap:1,overseas:0},
-  {id:16,n:"Jasprit Bumrah",r:"BOWL",c:"India",b:200,cap:1,overseas:0},
-  {id:17,n:"Hardik Pandya",r:"AR",c:"India",b:200,cap:1,overseas:0},
-  {id:18,n:"Ravindra Jadeja",r:"AR",c:"India",b:200,cap:1,overseas:0},
-  {id:19,n:"Suryakumar Yadav",r:"BAT",c:"India",b:200,cap:1,overseas:0},
-  {id:20,n:"Shubman Gill",r:"BAT",c:"India",b:200,cap:1,overseas:0},
-  {id:21,n:"Yashasvi Jaiswal",r:"BAT",c:"India",b:200,cap:1,overseas:0},
-  {id:22,n:"Ishan Kishan",r:"WK",c:"India",b:200,cap:1,overseas:0},
-  {id:23,n:"Axar Patel",r:"AR",c:"India",b:200,cap:1,overseas:0},
-  {id:24,n:"Kuldeep Yadav",r:"BOWL",c:"India",b:200,cap:1,overseas:0},
-  {id:25,n:"Ruturaj Gaikwad",r:"BAT",c:"India",b:75,cap:1,overseas:0},
-  {id:26,n:"Tilak Varma",r:"BAT",c:"India",b:75,cap:1,overseas:0},
-  {id:27,n:"Shardul Thakur",r:"AR",c:"India",b:150,cap:1,overseas:0},
-  {id:28,n:"Deepak Chahar",r:"BOWL",c:"India",b:150,cap:1,overseas:0},
-  {id:29,n:"T Natarajan",r:"BOWL",c:"India",b:75,cap:1,overseas:0},
-  {id:30,n:"Washington Sundar",r:"AR",c:"India",b:75,cap:1,overseas:0},
-  {id:31,n:"Pat Cummins",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
-  {id:32,n:"Andre Russell",r:"AR",c:"West Indies",b:200,cap:1,overseas:1},
-  {id:33,n:"Sunil Narine",r:"AR",c:"West Indies",b:200,cap:1,overseas:1},
-  {id:34,n:"Glenn Maxwell",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
-  {id:35,n:"Rashid Khan",r:"AR",c:"Afghanistan",b:200,cap:1,overseas:1},
-  {id:36,n:"David Warner",r:"BAT",c:"Australia",b:150,cap:1,overseas:1},
-  {id:37,n:"Nicholas Pooran",r:"WK",c:"West Indies",b:150,cap:1,overseas:1},
-  {id:38,n:"Faf du Plessis",r:"BAT",c:"South Africa",b:150,cap:1,overseas:1},
-  {id:39,n:"Trent Boult",r:"BOWL",c:"New Zealand",b:150,cap:1,overseas:1},
-  {id:40,n:"Heinrich Klaasen",r:"WK",c:"South Africa",b:150,cap:1,overseas:1},
-  {id:41,n:"Travis Head",r:"BAT",c:"Australia",b:150,cap:1,overseas:1},
-  {id:42,n:"Marcus Stoinis",r:"AR",c:"Australia",b:200,cap:1,overseas:1},
-  {id:43,n:"Sam Curran",r:"AR",c:"England",b:200,cap:1,overseas:1},
-  {id:44,n:"Wanindu Hasaranga",r:"AR",c:"Sri Lanka",b:150,cap:1,overseas:1},
-  {id:45,n:"Phil Salt",r:"WK",c:"England",b:150,cap:1,overseas:1},
-  {id:46,n:"Harry Brook",r:"BAT",c:"England",b:150,cap:1,overseas:1},
-  {id:47,n:"Marco Jansen",r:"AR",c:"South Africa",b:75,cap:1,overseas:1},
-  {id:48,n:"Matheesha Pathirana",r:"BOWL",c:"Sri Lanka",b:75,cap:1,overseas:1},
-  {id:49,n:"Alzarri Joseph",r:"BOWL",c:"West Indies",b:75,cap:1,overseas:1},
-  {id:50,n:"Romario Shepherd",r:"AR",c:"West Indies",b:75,cap:1,overseas:1},
-  {id:51,n:"Shimron Hetmyer",r:"BAT",c:"West Indies",b:75,cap:1,overseas:1},
-  {id:52,n:"Mujeeb Ur Rahman",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1},
-  {id:53,n:"Fazalhaq Farooqi",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1},
-  {id:54,n:"Rachin Ravindra",r:"AR",c:"New Zealand",b:75,cap:1,overseas:1},
-  {id:55,n:"Lockie Ferguson",r:"BOWL",c:"New Zealand",b:100,cap:1,overseas:1},
-  {id:56,n:"Spencer Johnson",r:"BOWL",c:"Australia",b:75,overseas:1},
-  {id:57,n:"Jake Fraser-McGurk",r:"BAT",c:"Australia",b:30,overseas:1},
-  {id:58,n:"Dewald Brevis",r:"BAT",c:"South Africa",b:75,overseas:1},
-  {id:59,n:"Noor Ahmad",r:"BOWL",c:"Afghanistan",b:30,overseas:1},
-  {id:60,n:"Rahmanullah Gurbaz",r:"WK",c:"Afghanistan",b:75,cap:1,overseas:1},
-  {id:61,n:"Rinku Singh",r:"BAT",c:"India",b:75,overseas:0},
-  {id:62,n:"Shivam Dube",r:"AR",c:"India",b:75,overseas:0},
-  {id:63,n:"Ravi Bishnoi",r:"BOWL",c:"India",b:75,overseas:0},
-  {id:64,n:"Khaleel Ahmed",r:"BOWL",c:"India",b:75,overseas:0},
-  {id:65,n:"Jitesh Sharma",r:"WK",c:"India",b:50,overseas:0},
-  {id:66,n:"Dhruv Jurel",r:"WK",c:"India",b:40,overseas:0},
-  {id:67,n:"Abhishek Sharma",r:"AR",c:"India",b:40,overseas:0},
-  {id:68,n:"Sai Sudharsan",r:"BAT",c:"India",b:40,overseas:0},
-  {id:69,n:"Nitish Kumar Reddy",r:"AR",c:"India",b:30,overseas:0},
-  {id:70,n:"Devdutt Padikkal",r:"BAT",c:"India",b:75,overseas:0},
-  {id:71,n:"Riyan Parag",r:"BAT",c:"India",b:30,overseas:0},
-  {id:72,n:"Harshit Rana",r:"BOWL",c:"India",b:30,overseas:0},
-  {id:73,n:"Mayank Yadav",r:"BOWL",c:"India",b:30,overseas:0},
-  {id:74,n:"Ramandeep Singh",r:"AR",c:"India",b:30,overseas:0},
-  {id:75,n:"Shahrukh Khan",r:"BAT",c:"India",b:30,overseas:0},
-  {id:76,n:"Ayush Badoni",r:"BAT",c:"India",b:20,overseas:0},
-  {id:77,n:"Arjun Tendulkar",r:"BOWL",c:"India",b:20,overseas:0},
-  {id:78,n:"Yash Dayal",r:"BOWL",c:"India",b:30,overseas:0},
-  {id:79,n:"Tushar Deshpande",r:"BOWL",c:"India",b:20,overseas:0},
-  {id:80,n:"Swapnil Singh",r:"AR",c:"India",b:20,overseas:0},
-  {id:81,n:"Nehal Wadhera",r:"BAT",c:"India",b:20,overseas:0},
-  {id:82,n:"Suyash Sharma",r:"BOWL",c:"India",b:20,overseas:0},
-  {id:83,n:"Abishek Porel",r:"WK",c:"India",b:20,overseas:0},
-  {id:84,n:"Vijaykumar Vyshak",r:"BOWL",c:"India",b:20,overseas:0},
-  {id:85,n:"Anuj Rawat",r:"WK",c:"India",b:20,overseas:0},
+  {id:1,n:"Rishabh Pant",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:931581},
+  {id:2,n:"Shreyas Iyer",r:"BAT",c:"India",b:200,cap:1,mq:1,overseas:0,cid:642519},
+  {id:3,n:"KL Rahul",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:422108},
+  {id:4,n:"Jos Buttler",r:"WK",c:"England",b:200,cap:1,mq:1,overseas:1,cid:308967},
+  {id:5,n:"Mitchell Starc",r:"BOWL",c:"Australia",b:200,cap:1,mq:1,overseas:1,cid:311592},
+  {id:6,n:"Arshdeep Singh",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:1125338},
+  {id:7,n:"Kagiso Rabada",r:"BOWL",c:"South Africa",b:200,cap:1,mq:1,overseas:1,cid:715355},
+  {id:8,n:"Mohammed Siraj",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:820353},
+  {id:9,n:"Yuzvendra Chahal",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:559235},
+  {id:10,n:"Liam Livingstone",r:"AR",c:"England",b:200,cap:1,mq:1,overseas:1,cid:457754},
+  {id:11,n:"David Miller",r:"BAT",c:"South Africa",b:150,cap:1,mq:1,overseas:1,cid:324383},
+  {id:12,n:"Mohammed Shami",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:277916},
+  {id:13,n:"Rohit Sharma",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:34102},
+  {id:14,n:"Virat Kohli",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:253802},
+  {id:15,n:"MS Dhoni",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:28081},
+  {id:16,n:"Jasprit Bumrah",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:625383},
+  {id:17,n:"Hardik Pandya",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:625371},
+  {id:18,n:"Ravindra Jadeja",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:234675},
+  {id:19,n:"Suryakumar Yadav",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:481896},
+  {id:20,n:"Shubman Gill",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1070173},
+  {id:21,n:"Yashasvi Jaiswal",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1174399},
+  {id:22,n:"Ishan Kishan",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:961823},
+  {id:23,n:"Axar Patel",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:606033},
+  {id:24,n:"Kuldeep Yadav",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:594953},
+  {id:25,n:"Ruturaj Gaikwad",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:969413},
+  {id:26,n:"Tilak Varma",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:1175440},
+  {id:27,n:"Shardul Thakur",r:"AR",c:"India",b:150,cap:1,overseas:0,cid:703963},
+  {id:28,n:"Deepak Chahar",r:"BOWL",c:"India",b:150,cap:1,overseas:0,cid:605307},
+  {id:29,n:"T Natarajan",r:"BOWL",c:"India",b:75,cap:1,overseas:0,cid:746755,wiki:"T._Natarajan"},
+  {id:30,n:"Washington Sundar",r:"AR",c:"India",b:75,cap:1,overseas:0,cid:854128},
+  {id:31,n:"Pat Cummins",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:325012},
+  {id:32,n:"Andre Russell",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:300613},
+  {id:33,n:"Sunil Narine",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:232364},
+  {id:34,n:"Glenn Maxwell",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:374163},
+  {id:35,n:"Rashid Khan",r:"AR",c:"Afghanistan",b:200,cap:1,overseas:1,cid:793463},
+  {id:36,n:"David Warner",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:219889},
+  {id:37,n:"Nicholas Pooran",r:"WK",c:"West Indies",b:150,cap:1,overseas:1,cid:787467},
+  {id:38,n:"Faf du Plessis",r:"BAT",c:"South Africa",b:150,cap:1,overseas:1,cid:44828},
+  {id:39,n:"Trent Boult",r:"BOWL",c:"New Zealand",b:150,cap:1,overseas:1,cid:436757},
+  {id:40,n:"Heinrich Klaasen",r:"WK",c:"South Africa",b:150,cap:1,overseas:1,cid:377534},
+  {id:41,n:"Travis Head",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:547461},
+  {id:42,n:"Marcus Stoinis",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:665356},
+  {id:43,n:"Sam Curran",r:"AR",c:"England",b:200,cap:1,overseas:1,cid:972769},
+  {id:44,n:"Wanindu Hasaranga",r:"AR",c:"Sri Lanka",b:150,cap:1,overseas:1,cid:940371},
+  {id:45,n:"Phil Salt",r:"WK",c:"England",b:150,cap:1,overseas:1,cid:1107041},
+  {id:46,n:"Harry Brook",r:"BAT",c:"England",b:150,cap:1,overseas:1,cid:1121617},
+  {id:47,n:"Marco Jansen",r:"AR",c:"South Africa",b:75,cap:1,overseas:1,cid:1076093},
+  {id:48,n:"Matheesha Pathirana",r:"BOWL",c:"Sri Lanka",b:75,cap:1,overseas:1,cid:1226562},
+  {id:49,n:"Alzarri Joseph",r:"BOWL",c:"West Indies",b:75,cap:1,overseas:1,cid:921989},
+  {id:50,n:"Romario Shepherd",r:"AR",c:"West Indies",b:75,cap:1,overseas:1,cid:1105353},
+  {id:51,n:"Shimron Hetmyer",r:"BAT",c:"West Indies",b:75,cap:1,overseas:1,cid:867630},
+  {id:52,n:"Mujeeb Ur Rahman",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:885535,wiki:"Mujeeb_ur_Rahman"},
+  {id:53,n:"Fazalhaq Farooqi",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1033502},
+  {id:54,n:"Rachin Ravindra",r:"AR",c:"New Zealand",b:75,cap:1,overseas:1,cid:1229096},
+  {id:55,n:"Lockie Ferguson",r:"BOWL",c:"New Zealand",b:100,cap:1,overseas:1,cid:592093},
+  {id:56,n:"Spencer Johnson",r:"BOWL",c:"Australia",b:75,overseas:1,cid:1209302},
+  {id:57,n:"Jake Fraser-McGurk",r:"BAT",c:"Australia",b:30,overseas:1,cid:1207609},
+  {id:58,n:"Dewald Brevis",r:"BAT",c:"South Africa",b:75,overseas:1,cid:1261007},
+  {id:59,n:"Noor Ahmad",r:"BOWL",c:"Afghanistan",b:30,overseas:1,cid:1189918},
+  {id:60,n:"Rahmanullah Gurbaz",r:"WK",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1227845},
+  {id:61,n:"Rinku Singh",r:"BAT",c:"India",b:75,overseas:0,cid:920311,wiki:"Rinku_Singh_(cricketer)"},
+  {id:62,n:"Shivam Dube",r:"AR",c:"India",b:75,overseas:0,cid:788278},
+  {id:63,n:"Ravi Bishnoi",r:"BOWL",c:"India",b:75,overseas:0,cid:1092426},
+  {id:64,n:"Khaleel Ahmed",r:"BOWL",c:"India",b:75,overseas:0,cid:736468},
+  {id:65,n:"Jitesh Sharma",r:"WK",c:"India",b:50,overseas:0,cid:966158},
+  {id:66,n:"Dhruv Jurel",r:"WK",c:"India",b:40,overseas:0,cid:1173434},
+  {id:67,n:"Abhishek Sharma",r:"AR",c:"India",b:40,overseas:0,cid:947558,wiki:"Abhishek_Sharma_(cricketer)"},
+  {id:68,n:"Sai Sudharsan",r:"BAT",c:"India",b:40,overseas:0,cid:1175429},
+  {id:69,n:"Nitish Kumar Reddy",r:"AR",c:"India",b:30,overseas:0,cid:1340499},
+  {id:70,n:"Devdutt Padikkal",r:"BAT",c:"India",b:75,overseas:0,cid:1079938},
+  {id:71,n:"Riyan Parag",r:"BAT",c:"India",b:30,overseas:0,cid:1178057},
+  {id:72,n:"Harshit Rana",r:"BOWL",c:"India",b:30,overseas:0,cid:1283431},
+  {id:73,n:"Mayank Yadav",r:"BOWL",c:"India",b:30,overseas:0,cid:1251327},
+  {id:74,n:"Ramandeep Singh",r:"AR",c:"India",b:30,overseas:0,cid:1082750,wiki:"Ramandeep_Singh_(cricketer)"},
+  {id:75,n:"Shahrukh Khan",r:"BAT",c:"India",b:30,overseas:0,cid:1096225,wiki:"Shahrukh_Khan_(cricketer)"},
+  {id:76,n:"Ayush Badoni",r:"BAT",c:"India",b:20,overseas:0,cid:1178078},
+  {id:77,n:"Arjun Tendulkar",r:"BOWL",c:"India",b:20,overseas:0,cid:1188305},
+  {id:78,n:"Yash Dayal",r:"BOWL",c:"India",b:30,overseas:0,cid:1175458},
+  {id:79,n:"Tushar Deshpande",r:"BOWL",c:"India",b:20,overseas:0,cid:969428},
+  {id:80,n:"Swapnil Singh",r:"AR",c:"India",b:20,overseas:0,cid:1100095},
+  {id:81,n:"Nehal Wadhera",r:"BAT",c:"India",b:20,overseas:0,cid:1175454},
+  {id:82,n:"Suyash Sharma",r:"BOWL",c:"India",b:20,overseas:0,cid:1326571},
+  {id:83,n:"Abishek Porel",r:"WK",c:"India",b:20,overseas:0,cid:1340503},
+  {id:84,n:"Vijaykumar Vyshak",r:"BOWL",c:"India",b:20,overseas:0,cid:1100196},
+  {id:85,n:"Anuj Rawat",r:"WK",c:"India",b:20,overseas:0,cid:1263718},
 ];
 
 // ═══════ CONSTANTS ═══════
@@ -835,7 +971,7 @@ const C76=194.8,C62=163.4;
 const STORE_KEY='ipl-auction-session-v2';
 let amHost=false, myTid='', myName='', myTeamName='', roomCode='';
 let hostPeer=null, bidderPeer=null, bidderConn=null, bidderConns={};
-let tickId=null, ovShown=false, pauseTs=0;
+let tickId=null, ovShown=false, pauseTs=0, _autoUnsoldTimer=null;
 let pickFilter='all';
 let chatOpen=false;
 let unreadChat=0;
@@ -893,22 +1029,53 @@ function renderRecoveredScreen(){
     if(G.phase==='done') renderRes(); else renderBidderUI();
   }
 }
+let _pendingSession=null;
 function maybeRestoreSession(){
   if(suppressAutoRestore) return;
   const s=loadSession();
   if(!s||!s.roomCode) return;
-  hydrateFromSnapshot(s);
-  const msg=amHost
-    ? `Resume previous hosted room ${roomCode} from where you left off?`
-    : `Reconnect to room ${roomCode} as ${myTeamName}?`;
-  if(confirm(msg)){
-    if(amHost) recoverHostSession();
-    else recoverBidderSession();
-  } else {
-    clearSession();
-    amHost=false;myTid='';myName='';myTeamName='';roomCode='';myDisplayName='Host';G.phase='lobby';
+  _pendingSession=s;
+  // Pre-hydrate just enough to read names
+  const savedAmHost=!!s.amHost;
+  const savedRoom=s.roomCode||'';
+  const savedTeam=s.myTeamName||'';
+  const savedName=s.myName||'';
+  const savedPhase=s.G?.phase||'lobby';
+  // Pre-fill join fields for bidder sessions
+  if(!savedAmHost){
+    if(savedName) el('j-name').value=savedName;
+    if(savedTeam) el('j-team').value=savedTeam;
+    if(savedRoom) el('j-code').value=savedRoom;
   }
+  // Show resume banner
+  const banner=el('resume-banner');
+  const meta=el('rb-meta-text');
+  if(savedAmHost){
+    meta.innerHTML=`<strong>Host room:</strong> ${savedRoom} &nbsp;·&nbsp; <strong>Status:</strong> ${savedPhase==='done'?'Auction finished':savedPhase==='lobby'?'In lobby':'Auction in progress'}`;
+  } else {
+    meta.innerHTML=`<strong>Team:</strong> ${savedTeam} &nbsp;·&nbsp; <strong>Room:</strong> ${savedRoom} &nbsp;·&nbsp; <strong>Status:</strong> ${savedPhase==='done'?'Finished':savedPhase==='lobby'?'In lobby':'In progress'}`;
+  }
+  if(banner) banner.style.display='block';
 }
+function confirmResume(){
+  const banner=el('resume-banner');
+  if(banner) banner.style.display='none';
+  if(!_pendingSession) return;
+  hydrateFromSnapshot(_pendingSession);
+  _pendingSession=null;
+  if(amHost) recoverHostSession();
+  else recoverBidderSession();
+}
+function dismissResume(){
+  const banner=el('resume-banner');
+  if(banner) banner.style.display='none';
+  _pendingSession=null;
+  clearSession();
+  // Clear pre-filled fields only if user wants fresh start
+  el('j-name').value='';el('j-team').value='';el('j-code').value='';
+  amHost=false;myTid='';myName='';myTeamName='';roomCode='';myDisplayName='Host';G.phase='lobby';
+}
+function setTeam(name){el('j-team').value=name;}
 
 // ═══════ RESTRICTION CHECKER ═══════
 function getRules(t){
@@ -1022,6 +1189,8 @@ function handleBidderMsg(conn,msg){
     if(bidHistory.length>20) bidHistory.pop();
     broadcast();startTick();playBid();
     renderBidHist();
+    // Flash host bid box
+    flashEl('h-amt');flashEl('bid-box-wrap');
   }
   if(msg.type==='PASS'){
     if(G.phase!=='bidding'||G.paused) return;
@@ -1031,6 +1200,19 @@ function handleBidderMsg(conn,msg){
     G.passed=G.passed||{};
     G.passed[conn.peer]=true;
     broadcast();
+    // Auto-unsold if everyone passed with no current bidder
+    if(!G.bidder){
+      const allEffectivePassed=G.teams.every(t=>{
+        if(G.passed[t.id]) return true;
+        const{ok}=canBid(t,p);return !ok; // can't bid = effectively passed
+      });
+      if(allEffectivePassed){
+        clearTimeout(_autoUnsoldTimer);
+        _autoUnsoldTimer=setTimeout(()=>{
+          if(G.phase==='bidding'&&!G.paused&&!G.bidder) hUnsold();
+        },1500);
+      }
+    }
   }
   if(msg.type==='CHAT'){
     const t=G.teams.find(t=>t.id===conn.peer);
@@ -1067,15 +1249,17 @@ function attachBidderConnHandlers(code){
     el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
     bidderConn.send({type:'JOIN',name:myTeamName,owner:myName});
     go('pg-bid');el('b-tname').textContent=myTeamName;
-    el('conn-status').textContent='● Connected to host';el('conn-status').className='conn-status ok';
+    el('conn-status').innerHTML='<span class="conn-dot"></span>Connected to host';el('conn-status').className='conn-status ok';
     el('bchat-fab').style.display='flex';
     persistSession();
   });
   bidderConn.on('data',msg=>{
     if(msg.type==='STATE'){
       const prevBidder=G.bidder;
+      const prevAmt=G.bid;
       G=msg.G;renderBidderUI();persistSession();
-      if(G.bidder&&G.bidder!==prevBidder) playBid();
+      if(G.bidder&&G.bidder!==prevBidder){playBid();flashEl('b-amt');flashEl('b-cur');}
+      else if(G.bid!==prevAmt){flashEl('b-amt');}
       if(G.phase==='bidding'&&!G.paused) startTick(); else clearInterval(tickId);
       if(G.phase==='sold'&&!ovShown){ovShown=true;showOvSold();playSold();}
       if(G.phase==='unsold'&&!ovShown){ovShown=true;showOvUnsold();playUnsold();}
@@ -1088,7 +1272,7 @@ function attachBidderConnHandlers(code){
   bidderConn.on('error',scheduleReconnect);
 }
 function scheduleReconnect(){
-  el('conn-status').textContent='● Reconnecting to host...';el('conn-status').className='conn-status bad';
+  el('conn-status').innerHTML='<span class="conn-dot"></span>Reconnecting to host...';el('conn-status').className='conn-status bad';
   if(reconnectTimer||!bidderPeer||!roomCode) return;
   reconnectTimer=setTimeout(()=>{
     reconnectTimer=null;
@@ -1130,6 +1314,7 @@ function doStart(){
   G.phase='bidding';G.idx=0;G.bid=0;G.bidder=null;G.ts=Date.now();
   G.sold=0;G.unsold=0;G.skipped=0;G.paused=false;G.passed={};
   broadcast();go('pg-host');startTick();
+  prefetchImages(0,6); // warm image cache for first 6 players
   systemChat('Auction started! Good luck everyone 🏏');
 }
 function hSold(){if(!amHost||!G.bidder||G.paused) return;clearInterval(tickId);doSold();}
@@ -1173,6 +1358,22 @@ function declinePauseReq(){
   const t=G.teams.find(t=>t.id===pendingPauseReq?.peerId);
   if(t) toast(`Declined pause request from ${t.name}`);
   pendingPauseReq=null;
+}
+function resetAuction(){
+  if(!amHost) return;
+  if(!confirm('Reset the ENTIRE auction? All bids, sold players and purses will be wiped. Teams stay connected and can start again.')) return;
+  clearInterval(tickId);
+  const savedTeams=G.teams.map(t=>({id:t.id,name:t.name,owner:t.owner,color:t.color}));
+  const numT=G.numT;
+  setupFreshAuction(numT);
+  // Re-attach connected teams with full purse
+  G.teams=savedTeams.map(t=>({...t,purse:PURSE,players:[]}));
+  G.phase='lobby';
+  bidHistory=[];auctionLog=[];
+  broadcast();
+  go('pg-lobby');renderLobby();
+  systemChat('🔄 Auction has been reset by the host. Starting fresh!');
+  toast('🔄 Auction reset — teams still connected, ready to start again');
 }
 function hRelist(){
   if(!amHost||G.phase!=='bidding') return;
@@ -1323,9 +1524,10 @@ function openProfile(pid){
   let soldTo=null,soldPrice=0;
   G.teams.forEach(t=>{const sp=t.players.find(x=>x.id===pid);if(sp){soldTo=t;soldPrice=sp.sp;}});
   const watching=myWatchlist.has(pid);
-  const searchName=encodeURIComponent(p.n);
+  const lk=statsLinks(p);
   el('profile-content').innerHTML=`
     <div class="profile-hero">
+      <div style="margin-bottom:10px">${playerAvatarHtml(p,90)}</div>
       <span class="r-${p.r}" style="padding:3px 12px;border-radius:20px;font-size:.75rem;font-weight:700">${RL(p.r)}</span>
       <div class="profile-name" style="margin-top:8px">${p.n}${p.mq?' ⭐':''}</div>
       <div style="font-size:.75rem;color:#888;margin-top:2px">${p.c} · ${p.cap?'Capped Indian':'Uncapped'}${p.overseas?' · 🌍 Overseas':''}</div>
@@ -1337,24 +1539,25 @@ function openProfile(pid){
       </div>
     </div>
     <div class="profile-links">
-      <a class="profile-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">
+      <a class="profile-link" href="${lk.cricinfo}" onclick="return openLink(this.href)" rel="noopener">
         <span class="profile-link-icon">🏏</span>
         <div><div class="profile-link-label">ESPN Cricinfo</div><div class="profile-link-sub">Career stats, matches, records</div></div>
-        <span style="margin-left:auto;color:#444">↗</span>
+        <span style="margin-left:auto;color:#555;font-size:.8rem">↗</span>
       </a>
-      <a class="profile-link" href="https://www.iplt20.com/search?query=${searchName}" target="_blank" rel="noopener">
-        <span class="profile-link-icon">🔵</span>
-        <div><div class="profile-link-label">IPL Official Page</div><div class="profile-link-sub">IPL stats, franchise history</div></div>
-        <span style="margin-left:auto;color:#444">↗</span>
+      <a class="profile-link" href="${lk.cricbuzz}" onclick="return openLink(this.href)" rel="noopener">
+        <span class="profile-link-icon">🟠</span>
+        <div><div class="profile-link-label">Cricbuzz</div><div class="profile-link-sub">News, rankings, IPL auction history</div></div>
+        <span style="margin-left:auto;color:#555;font-size:.8rem">↗</span>
       </a>
-      <a class="profile-link" href="https://www.google.com/search?q=${searchName}+cricket+stats+IPL+2025" target="_blank" rel="noopener">
+      <a class="profile-link" href="${lk.google}" onclick="return openLink(this.href)" rel="noopener">
         <span class="profile-link-icon">🔍</span>
-        <div><div class="profile-link-label">Google Search</div><div class="profile-link-sub">Latest news &amp; analysis</div></div>
-        <span style="margin-left:auto;color:#444">↗</span>
+        <div><div class="profile-link-label">Google</div><div class="profile-link-sub">Latest news &amp; analysis</div></div>
+        <span style="margin-left:auto;color:#555;font-size:.8rem">↗</span>
       </a>
     </div>
     ${!amHost?`<div style="margin-top:12px"><button onclick="toggleWatch(${pid});closeModal('profile-modal')" style="width:100%;padding:11px;border-radius:10px;border:1px solid ${watching?'var(--rd)':'rgba(255,215,0,.3)'};background:${watching?'rgba(255,59,48,.1)':'rgba(255,215,0,.07)'};color:${watching?'#ff8888':'var(--g)'};font-size:.85rem;font-weight:700;cursor:pointer">${watching?'⭐ Remove from Watchlist':'☆ Add to Watchlist'}</button></div>`:''}`;
   el('profile-modal').style.display='flex';
+  schedulePhotoLoad(p);
 }
 
 // ═══════ PICK PLAYER MODAL ═══════
@@ -1445,6 +1648,7 @@ function advance(){
   G.idx++;
   bidHistory=[];renderBidHist();
   G.bid=0;G.bidder=null;G.ts=Date.now();G.passed={};
+  prefetchImages(G.idx,4); // pre-warm next 4 player images
   if(G.idx>=G.Q.length){
     const unsoldRemain=G.unsoldList.filter(p=>p.status==='unsold');
     if(unsoldRemain.length>0&&!G.relisted){
@@ -1467,9 +1671,13 @@ function doTick(){
   const elapsed=Math.floor((Date.now()-G.ts)/1000);
   const rem=Math.max(0,SECS-elapsed);
   setTimerUI(rem);
+  // Urgency animation
+  const rings=document.querySelectorAll('.t-ring,.bid-t-ring');
+  rings.forEach(r=>{r.classList.toggle('urgent',rem<=5&&rem>0);});
   if(rem<=5&&rem>0&&amHost) playTimer();
   if(rem<=0){
     clearInterval(tickId);
+    rings.forEach(r=>r.classList.remove('urgent'));
     if(amHost&&G.phase==='bidding'&&!G.paused){
       if(G.bidder) doSold(); else doUnsold();
     }
@@ -1504,8 +1712,9 @@ function renderHostUI(){
     stage.innerHTML=`<div class="st-lot" style="font-size:1rem;padding:18px">🏆 Main auction complete!<br><span style="font-size:.8rem;color:#777;font-weight:400">${unsoldRemain.length?`${unsoldRemain.length} unsold — click Re-list Unsold`:'All done!'}</span></div>`;
     return;
   }
-  const searchName=encodeURIComponent(p.n);
+  const plk=statsLinks(p);
   stage.innerHTML=`<div class="st-lot">LOT ${G.idx+1}/${G.Q.length}${p.mq?' ⭐ MARQUEE':''}</div>
+    <div style="margin:6px auto 8px">${playerAvatarHtml(p,80)}</div>
     <div class="st-name">${p.n}</div>
     <span class="st-role r-${p.r}">${RL(p.r)}</span>
     <div class="st-grid">
@@ -1516,7 +1725,11 @@ function renderHostUI(){
       <div class="st-item"><div class="st-v">${RL(p.r)}</div><div class="st-l">Role</div></div>
       <div class="st-item"><div class="st-v">${G.Q.length-G.idx-1}</div><div class="st-l">After This</div></div>
     </div>
-    <a class="st-stats-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">🏏 View Stats on Cricinfo ↗</a>`;
+    <div style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap">
+      <a class="st-stats-link" href="${plk.cricinfo}" onclick="return openLink(this.href)" rel="noopener">🏏 Cricinfo ↗</a>
+      <a class="st-stats-link" href="${plk.cricbuzz}" onclick="return openLink(this.href)" rel="noopener">🟠 Cricbuzz ↗</a>
+    </div>`;
+  schedulePhotoLoad(p);
   if(G.bidder){
     const t=G.teams.find(t=>t.id===G.bidder);
     setT('h-amt',F(G.bid));
@@ -1579,6 +1792,21 @@ function renderBidHist(){
 function renderBidderUI(){
   const me=G.teams.find(t=>t.id===myTid);
   if(me){setT('b-tname',me.name);setT('b-purse',F(me.purse));}
+
+  // Lobby waiting overlay
+  const lobbyWait=el('bidder-lobby-wait');
+  if(lobbyWait){
+    const inLobby=G.phase==='lobby';
+    lobbyWait.style.display=inLobby?'flex':'none';
+    if(inLobby){
+      const sub=el('blw-sub-text');
+      if(sub) sub.textContent=`${G.teams.length}/${G.numT} teams joined. Waiting for the host to start the auction.`;
+      const tc=el('blw-teams');
+      if(tc) tc.innerHTML=G.teams.map(t=>`<div class="blw-team-chip" style="background:${t.color}20;border-color:${t.color}44;color:${t.color}">${t.name}</div>`).join('');
+      return; // Don't render auction UI while in lobby
+    }
+  }
+
   const pm=el('b-pause-msg');if(pm){if(G.paused) pm.classList.add('show');else pm.classList.remove('show');}
   const p=G.Q[G.idx];if(!p) return;
   setT('b-lot',`LOT ${G.idx+1}/${G.Q.length}${p.mq?' ⭐':''}`);
@@ -1588,12 +1816,15 @@ function renderBidderUI(){
     <div class="bpm"><div class="bpm-v">${p.c}</div><div class="bpm-l">Nation</div></div>
     <div class="bpm"><div class="bpm-v">${F(p.b)}</div><div class="bpm-l">Base</div></div>
     <div class="bpm"><div class="bpm-v">${p.cap?'✅ Capped':'🔓 Uncapped'}</div><div class="bpm-l">Status</div></div>`;
+  // Player photo in bidder card
+  const bphotoWrap=el('b-photo-wrap');
+  if(bphotoWrap){bphotoWrap.innerHTML=playerAvatarHtml(p,72);schedulePhotoLoad(p);}
   // Stats links + watchlist
-  const searchName=encodeURIComponent(p.n);
+  const blk=statsLinks(p);
   const watching=myWatchlist.has(p.id);
   el('b-stats-row').innerHTML=`
-    <a class="bid-stats-link" href="https://www.espncricinfo.com/search?query=${searchName}" target="_blank" rel="noopener">🏏 Cricinfo ↗</a>
-    <a class="bid-stats-link" href="https://www.iplt20.com/search?query=${searchName}" target="_blank" rel="noopener">🔵 IPL ↗</a>
+    <a class="bid-stats-link" href="${blk.cricinfo}" onclick="return openLink(this.href)" rel="noopener">🏏 Cricinfo ↗</a>
+    <a class="bid-stats-link" href="${blk.cricbuzz}" onclick="return openLink(this.href)" rel="noopener">🟠 Cricbuzz ↗</a>
     <button class="bid-watchlist-btn ${watching?'starred':''}" id="wb-${p.id}" onclick="toggleWatch(${p.id})">${watching?'⭐ Watching':'☆ Watch'}</button>
     <button class="bid-stats-link" style="cursor:pointer;background:none;border:1px solid rgba(255,255,255,.12);color:#888" onclick="openProfile(${p.id})">👤 Profile</button>`;
   if(G.bidder){
@@ -1639,7 +1870,7 @@ function renderBidderUI(){
   const{ok,reason}=canBid(me,p);
   btn.disabled=!ok||iLead||iPassed;
   if(iLead){
-    btn.textContent=`🏆 You Lead — ${F(G.bid)}`;btn.className='big-btn lead-btn';
+    btn.textContent=`🏆 You Lead — ${F(G.bid)}`;btn.className='big-btn lead-btn pulsing';
     sub.textContent='Defend your bid! Opponents bidding...';sub.className='bid-sub yl';
     if(passStatus) passStatus.textContent=`${passedCount} team(s) not interested yet`;
   } else if(!ok){
@@ -1651,7 +1882,7 @@ function renderBidderUI(){
     sub.textContent='You marked not interested for this player.';sub.className='bid-sub warn';
     if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed`;
   } else {
-    btn.textContent=`🔔 BID  ${F(nb)}`;btn.className='big-btn';
+    btn.textContent=`🔔 BID  ${F(nb)}`;btn.className='big-btn pulsing';
     sub.textContent=`Purse left: ${F(me.purse-nb)} after this`;sub.className='bid-sub';
     if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed so far`;
   }
@@ -1750,14 +1981,15 @@ function showOvSold(){
   const p=G.Q[G.idx],t=G.teams.find(t=>t.id===G.bidder);if(!p||!t) return;
   const d=document.createElement('div');d.className='ov';
   d.innerHTML=`<div class="ov-c">
-    <div class="ov-sold">SOLD!</div>
-    <div class="ov-name">${p.n}</div>
-    <div class="ov-to">to <strong style="color:${t.color}">${t.name}</strong></div>
-    <div class="ov-price">${F(G.bid)}</div>
-    <div class="ov-reactions">🎉🔥🏏</div>
+    <span class="ov-gavel">🔨</span>
+    <div class="ov-sold" style="font-size:4.5rem;font-weight:900;color:var(--g);line-height:1;text-shadow:0 0 50px rgba(255,215,0,.5)">SOLD!</div>
+    <div class="ov-name" style="font-size:1.7rem;font-weight:700;margin-top:8px">${p.n}</div>
+    <div class="ov-to" style="font-size:.95rem;color:#aaa;margin-top:4px">to <strong style="color:${t.color}">${t.name}</strong></div>
+    <div class="ov-price" style="font-size:2.6rem;font-weight:900;color:var(--gr);margin-top:6px">${F(G.bid)}</div>
+    <div class="ov-reactions" style="display:flex;gap:10px;justify-content:center;margin-top:14px;font-size:1.8rem">🎉🔥🏏</div>
   </div>`;
   document.body.appendChild(d);
-  // Random emoji burst
+  spawnConfetti();
   ['🔥','💰','🏏','👏','😮'].forEach((e,i)=>setTimeout(()=>floatEmoji(e),i*180));
 }
 function showOvUnsold(){
@@ -1776,6 +2008,23 @@ function floatEmoji(emoji){
   const d=document.createElement('div');d.className='emoji-float';d.textContent=emoji;
   d.style.left=Math.random()*80+10+'vw';d.style.bottom='20vh';
   document.body.appendChild(d);setTimeout(()=>d.remove(),2100);
+}
+function flashEl(id){
+  const e=el(id);if(!e) return;
+  e.classList.remove('flash');
+  void e.offsetWidth; // reflow
+  e.classList.add('flash');
+  setTimeout(()=>e.classList.remove('flash'),700);
+}
+function spawnConfetti(){
+  const cols=['#FFD700','#FF6B00','#00C851','#FF3B30','#4A90D9','#B44FE8','#fff'];
+  for(let i=0;i<60;i++){
+    setTimeout(()=>{
+      const d=document.createElement('div');d.className='cf';
+      d.style.cssText=`left:${Math.random()*100}vw;top:-10px;width:${6+Math.random()*6}px;height:${6+Math.random()*6}px;background:${cols[Math.floor(Math.random()*cols.length)]};animation-duration:${2+Math.random()*1.5}s;animation-delay:0s;transform:rotate(${Math.random()*360}deg)`;
+      document.body.appendChild(d);setTimeout(()=>d.remove(),4000);
+    },i*25);
+  }
 }
 
 // ═══════ RESULTS ═══════
@@ -1843,6 +2092,78 @@ function rndCode(){return Math.random().toString(36).substring(2,8).toUpperCase(
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),3200);}
 function fmtTime(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
 function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function openLink(url){window.open(url,'_blank','noopener,noreferrer');return false;}
+
+function statsLinks(p){
+  const name = typeof p==='string' ? p : p.n;
+  const cid  = typeof p==='object' ? p.cid : null;
+  const q=encodeURIComponent(name);
+  const slug=name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const cricinfoUrl = cid
+    ? `https://www.espncricinfo.com/cricketers/${slug}-${cid}`
+    : `https://www.espncricinfo.com/search?query=${q}`;
+  const cricbuzzUrl = `https://www.cricbuzz.com/search?q=${q}`;
+  return{
+    cricinfo: cricinfoUrl,
+    cricbuzz: cricbuzzUrl,
+    google:`https://www.google.com/search?q=${q}+cricketer+IPL+stats`
+  };
+}
+
+function roleColor(r){return{BAT:'#FF8C00',BOWL:'#EF5350',AR:'#66BB6A',WK:'#42A5F5'}[r]||'#FFD700';}
+function initials(n){return n.split(' ').map(x=>x[0]||'').join('').slice(0,2).toUpperCase();}
+
+// ── WIKIPEDIA PHOTO LOADER ──────────────────────────────────────────
+// _imgCache values: undefined=not fetched, null=no image, string=URL
+const _imgCache={};
+const BLANK='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+async function wikiImg(p){
+  const key=p.id;
+  if(key in _imgCache) return _imgCache[key];
+  const slug=(p.wiki||p.n.replace(/\s+/g,'_'));
+  try{
+    const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
+      {headers:{'Accept':'application/json'}});
+    if(!r.ok){_imgCache[key]=null;return null;}
+    const d=await r.json();
+    let url=d?.thumbnail?.source||null;
+    if(url) url=url.replace(/\/\d+px-/,'/200px-'); // request 200px
+    _imgCache[key]=url;
+    return url;
+  }catch{_imgCache[key]=null;return null;}
+}
+
+function schedulePhotoLoad(p){
+  if(_imgCache[p.id]!==undefined&&!_imgCache[p.id]) return; // known no-image
+  wikiImg(p).then(url=>{
+    if(!url) return;
+    document.querySelectorAll(`img[data-pid="${p.id}"]`).forEach(img=>{
+      img.src=url;
+    });
+  });
+}
+
+function prefetchImages(startIdx,count=4){
+  for(let i=startIdx;i<Math.min(startIdx+count,G.Q.length);i++){
+    const pl=PL.find(x=>x.id===G.Q[i].id);
+    if(pl&&!(pl.id in _imgCache)) wikiImg(pl);
+  }
+}
+
+function playerAvatarHtml(p,sz=88){
+  const ini=initials(p.n),col=roleColor(p.r);
+  const cached=_imgCache[p.id];
+  const hasCached=typeof cached==='string';
+  const ring=`border-radius:50%;border:2.5px solid rgba(255,215,0,.3)`;
+  // Avatar layer (always visible until photo loads)
+  const avDiv=`<div style="position:absolute;inset:0;${ring};background:${col};display:flex;align-items:center;justify-content:center;font-size:${Math.round(sz*.32)}px;font-weight:900;color:rgba(0,0,0,.75)">${ini}</div>`;
+  // Photo layer (fades in when src loads; hidden when no cache yet)
+  const imgSrc=hasCached?cached:BLANK;
+  const imgOp=hasCached?'1':'0';
+  const imgTag=`<img src="${imgSrc}" data-pid="${p.id}" style="position:absolute;inset:0;width:100%;height:100%;${ring};object-fit:cover;opacity:${imgOp};transition:opacity .4s" onload="if(this.src&&this.src!=='${BLANK}')this.style.opacity='1'" loading="lazy">`;
+  return `<div style="position:relative;width:${sz}px;height:${sz}px;flex-shrink:0;margin:0 auto">${avDiv}${imgTag}</div>`;
+}
 window.addEventListener('beforeunload',persistSession);
 maybeRestoreSession();
 </script>
