@@ -2113,27 +2113,32 @@ function initials(n){return n.split(' ').map(x=>x[0]||'').join('').slice(0,2).to
 
 // ── WIKIPEDIA PHOTO LOADER ──────────────────────────────────────────
 // _imgCache values: undefined=not fetched, null=no image, string=URL
-const _imgCache={};
+const _imgCache={};   // pid → url string | null
+const _imgFetch={};   // pid → in-flight Promise (dedup)
 const BLANK='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-async function wikiImg(p){
+function wikiImg(p){
   const key=p.id;
-  if(key in _imgCache) return _imgCache[key];
+  if(key in _imgCache) return Promise.resolve(_imgCache[key]);
+  if(key in _imgFetch) return _imgFetch[key]; // already in-flight
   const slug=(p.wiki||p.n.replace(/\s+/g,'_'));
-  try{
-    const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
-      {headers:{'Accept':'application/json'}});
-    if(!r.ok){_imgCache[key]=null;return null;}
-    const d=await r.json();
-    let url=d?.thumbnail?.source||null;
-    if(url) url=url.replace(/\/\d+px-/,'/200px-'); // request 200px
-    _imgCache[key]=url;
-    return url;
-  }catch{_imgCache[key]=null;return null;}
+  const promise=fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(slug)}`,
+    {headers:{'Accept':'application/json'}})
+    .then(r=>r.ok?r.json():null)
+    .then(d=>{
+      // Use thumbnail URL exactly as returned — no size transform (transformed sizes often 400)
+      const url=d?.thumbnail?.source||null;
+      _imgCache[key]=url;
+      delete _imgFetch[key];
+      return url;
+    })
+    .catch(()=>{_imgCache[key]=null;delete _imgFetch[key];return null;});
+  _imgFetch[key]=promise;
+  return promise;
 }
 
 function schedulePhotoLoad(p){
-  if(_imgCache[p.id]!==undefined&&!_imgCache[p.id]) return; // known no-image
+  if(p.id in _imgCache&&!_imgCache[p.id]) return; // confirmed no-image
   wikiImg(p).then(url=>{
     if(!url) return;
     document.querySelectorAll(`img[data-pid="${p.id}"]`).forEach(img=>{
@@ -2143,10 +2148,11 @@ function schedulePhotoLoad(p){
   });
 }
 
-function prefetchImages(startIdx,count=4){
-  for(let i=startIdx;i<Math.min(startIdx+count,G.Q.length);i++){
+function prefetchImages(startIdx,count=999){
+  const end=Math.min(startIdx+count,G.Q.length);
+  for(let i=startIdx;i<end;i++){
     const pl=PL.find(x=>x.id===G.Q[i].id);
-    if(pl&&!(pl.id in _imgCache)) wikiImg(pl);
+    if(pl&&!(pl.id in _imgCache)&&!(pl.id in _imgFetch)) wikiImg(pl);
   }
 }
 
