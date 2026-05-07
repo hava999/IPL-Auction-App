@@ -1395,9 +1395,17 @@ function broadcast(){
 }
 
 // ═══════ BIDDER PEERJS ═══════
+let _connTimeout=null;
 function attachBidderConnHandlers(code){
+  if(bidderConn){try{bidderConn.close();}catch(e){} bidderConn=null;}
+  clearTimeout(_connTimeout);
   bidderConn=bidderPeer.connect('iplauc-'+code,{reliable:true});
+  let opened=false;
+  // If WebRTC handshake stalls (open never fires, close/error never fire), retry after 8s
+  _connTimeout=setTimeout(()=>{if(!opened) scheduleReconnect();},8000);
   bidderConn.on('open',()=>{
+    opened=true;
+    clearTimeout(_connTimeout);_connTimeout=null;
     clearTimeout(reconnectTimer);reconnectTimer=null;
     _wasConnected=true;
     el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
@@ -1422,8 +1430,8 @@ function attachBidderConnHandlers(code){
       syncBidderChat();
     }
   });
-  bidderConn.on('close',scheduleReconnect);
-  bidderConn.on('error',scheduleReconnect);
+  bidderConn.on('close',()=>{clearTimeout(_connTimeout);_connTimeout=null;scheduleReconnect();});
+  bidderConn.on('error',()=>{clearTimeout(_connTimeout);_connTimeout=null;scheduleReconnect();});
 }
 function scheduleReconnect(){
   if(G.phase==='done') return;
@@ -1432,13 +1440,11 @@ function scheduleReconnect(){
   if(reconnectTimer||!roomCode) return;
   reconnectTimer=setTimeout(()=>{
     reconnectTimer=null;
-    // If peer was destroyed, recreate from scratch
-    if(!bidderPeer||bidderPeer.destroyed){doJoin();return;}
-    try{attachBidderConnHandlers(roomCode);}catch(e){scheduleReconnect();}
+    doJoin(); // always fully recreate peer for clean state
   },3000);
 }
 function doJoin(){
-  const name=v('j-name'),team=v('j-team'),code=v('j-code').toUpperCase();
+  const name=v('j-name')||myName, team=v('j-team')||myTeamName, code=(v('j-code')||roomCode||'').toUpperCase();
   if(!name||!team||!code||code.length<6){toast('Fill all fields and enter the 6-digit code');return;}
   el('join-btn').disabled=true;el('join-connecting').classList.add('show');
   roomCode=code;amHost=false;myName=name;myTeamName=team;myDisplayName=team;
