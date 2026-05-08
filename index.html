@@ -1353,7 +1353,7 @@ function updateConnCount(){
 function handleBidderMsg(conn,msg){
   if(msg.type==='JOIN'){
     const existsById=G.teams.find(t=>t.id===conn.peer);
-    const existsByName=!existsById&&G.teams.find(t=>t.name===msg.name&&t.owner===msg.owner);
+    const existsByName=!existsById&&G.teams.find(t=>t.name===msg.name);
     if(existsById){
       conn.send({type:'STATE',G});
     } else if(existsByName){
