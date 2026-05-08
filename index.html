@@ -2471,7 +2471,10 @@ function restoreAuction(){
   });
   const soldIds=new Set(builtTeams.flatMap(t=>t.players.map(p=>p.id)));
   const kohli=PL.find(p=>p.n==='Virat Kohli');
-  const Q=[kohli,...PL.filter(p=>!soldIds.has(p.id)&&p.id!==kohli.id)];
+  const rohit=PL.find(p=>p.n==='Rohit Sharma');
+  const priorityIds=new Set([kohli.id,rohit.id]);
+  const rest=PL.filter(p=>!soldIds.has(p.id)&&!priorityIds.has(p.id));
+  const Q=[kohli,rohit,...rest];
   const code=rndCode();
   const session={amHost:true,roomCode:code,myTid:'',myName:'',myTeamName:'',
     myDisplayName:'Host',
@@ -2480,6 +2483,8 @@ function restoreAuction(){
        paused:true,pauseRem:30,relisted:false,passed:{},chat:[]},
     bidHistory:[],auctionLog:[],watchlist:[],savedAt:Date.now()};
   localStorage.setItem('ipl-auction-session-v2',JSON.stringify(session));
+  // Push updated state to any bidders still connected on old room before tearing down
+  Object.values(bidderConns).forEach(c=>{try{c.send({type:'STATE',G});}catch(e){}});
   hydrateFromSnapshot(session);
   amHost=true;myDisplayName='Host';bidderConns={};
   if(hostPeer) try{hostPeer.destroy();}catch(e){}
