@@ -708,6 +708,16 @@ a{color:inherit}
     </div>
   </div>
 
+  <div class="card" style="border:2px solid rgba(240,180,41,.45);background:rgba(240,180,41,.04)">
+    <h2>🔄 Resume Kohli Auction</h2>
+    <div class="info-box" style="background:rgba(240,180,41,.08);border-color:rgba(240,180,41,.2)">
+      Restores the auction from the saved backup — all 4 teams with their squads and purses intact, starting from <strong style="color:var(--g)">Virat Kohli</strong>.<br>
+      <span style="color:#888;font-size:.78rem">Host clicks this · bidders join with the room code shown after</span>
+    </div>
+    <button class="btn btn-g" id="restore-btn" onclick="restoreAuction()" style="width:100%;padding:13px;font-size:1rem">🔄 Resume from Virat Kohli</button>
+    <div class="connecting-msg" id="restore-connecting"><span class="spin">⏳</span> Restoring session...</div>
+  </div>
+
   <div class="card">
     <h2>🎤 Host the Auction</h2>
     <div class="info-box">Host is the <strong>auctioneer only</strong> — you control the auction, call SOLD/Unsold, manage the flow. You do <strong>not</strong> bid or have a team.<br>
@@ -2419,8 +2429,11 @@ function playerAvatarHtml(p,sz=88){
 window.addEventListener('beforeunload',persistSession);
 maybeRestoreSession();
 
-// ═══════ ONE-TIME SESSION RESTORE (run restoreAuction() in console) ═══════
+// ═══════ SESSION RESTORE ═══════
 function restoreAuction(){
+  const btn=el('restore-btn'),ic=el('restore-connecting');
+  if(btn){btn.disabled=true;}
+  if(ic){ic.classList.add('show');}
   const COLORS_R=["#FFD700","#00C851","#4A90D9","#FF6B6B"];
   const raw=[
     {name:"Nanhe Jihadi X1",owner:"Harsh",ci:0,sales:[
@@ -2451,8 +2464,7 @@ function restoreAuction(){
   const builtTeams=raw.map(t=>{
     const players=t.sales.map(([nm,sp])=>{
       const p=PL.find(x=>x.n===nm);
-      if(!p){console.warn('NOT FOUND:',nm);return null;}
-      return{...p,sp};
+      return p?{...p,sp}:null;
     }).filter(Boolean);
     return{id:'rt-'+t.ci,name:t.name,owner:t.owner,color:COLORS_R[t.ci],
            purse:12000-players.reduce((s,p)=>s+p.sp,0),players};
@@ -2460,14 +2472,38 @@ function restoreAuction(){
   const soldIds=new Set(builtTeams.flatMap(t=>t.players.map(p=>p.id)));
   const kohli=PL.find(p=>p.n==='Virat Kohli');
   const Q=[kohli,...PL.filter(p=>!soldIds.has(p.id)&&p.id!==kohli.id)];
-  const session={amHost:true,roomCode:'VIRAT1',myTid:'',myName:'',myTeamName:'',
+  const code=rndCode();
+  const session={amHost:true,roomCode:code,myTid:'',myName:'',myTeamName:'',
     myDisplayName:'Host',
     G:{teams:builtTeams,Q,unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
        ts:Date.now(),phase:'bidding',sold:44,unsold:0,skipped:0,numT:4,
        paused:true,pauseRem:30,relisted:false,passed:{},chat:[]},
     bidHistory:[],auctionLog:[],watchlist:[],savedAt:Date.now()};
   localStorage.setItem('ipl-auction-session-v2',JSON.stringify(session));
-  console.log('%c✅ Session saved! Room code: VIRAT1 — now refresh the page.','color:lime;font-size:14px;font-weight:bold');
+  hydrateFromSnapshot(session);
+  amHost=true;myDisplayName='Host';bidderConns={};
+  if(hostPeer) try{hostPeer.destroy();}catch(e){}
+  hostPeer=new Peer('iplauc-'+code,{debug:0});
+  hostPeer.on('open',()=>{
+    if(ic){ic.classList.remove('show');}
+    if(btn){btn.disabled=false;}
+    el('lob-code').textContent=code;el('lob-title').textContent='Room '+code;el('hdr-room').textContent=code;
+    go('pg-host');renderHostUI();renderBidHist();renderHostLog();
+    persistSession();
+    toast('✅ Room code: '+code+' — share this with all bidders!');
+  });
+  hostPeer.on('error',e=>{
+    if(ic){ic.classList.remove('show');}
+    if(btn){btn.disabled=false;}
+    if(e.type==='unavailable-id'){toast('Code taken, retrying...');setTimeout(restoreAuction,600);}
+    else toast('Error: '+e.type+'. Try again.');
+  });
+  hostPeer.on('connection',conn=>{
+    conn.on('open',()=>{bidderConns[conn.peer]=conn;conn.send({type:'STATE',G});updateConnCount();persistSession();});
+    conn.on('data',msg=>handleBidderMsg(conn,msg));
+    conn.on('close',()=>{delete bidderConns[conn.peer];updateConnCount();renderHostUI();persistSession();});
+    conn.on('error',()=>{delete bidderConns[conn.peer];updateConnCount();persistSession();});
+  });
 }
 </script>
 </body>
