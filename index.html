@@ -844,6 +844,7 @@ a{color:inherit}
         <button class="hb-skip" onclick="hSkip()">⏭ Skip Player (back to queue)</button>
         <div class="hctrl-row2">
           <button class="hb-ovr" onclick="openOverrideBid()">✏️ Override Bid</button>
+          <button class="hb-ovr" onclick="hResetCurrent()" style="border-color:rgba(251,191,36,.35);color:#FBD76B">↺ Restart Player</button>
           <button class="hb-relist" id="hb-relist" onclick="hRelist()" disabled>🔄 Re-list Unsold</button>
         </div>
       </div>
@@ -1566,6 +1567,15 @@ function resetAuction(){
   go('pg-lobby');renderLobby();
   systemChat('🔄 Auction has been reset by the host. Starting fresh!');
   toast('🔄 Auction reset — teams still connected, ready to start again');
+}
+function hResetCurrent(){
+  if(!amHost||G.phase!=='bidding') return;
+  const p=G.Q[G.idx];if(!p) return;
+  clearInterval(tickId);
+  G.bid=0;G.bidder=null;G.ts=Date.now();G.passed={};
+  bidHistory=[];renderBidHist();
+  broadcast();startTick();
+  toast(`↺ Restarted bidding for ${p.n}`);
 }
 function hRelist(){
   if(!amHost||G.phase!=='bidding') return;
