@@ -711,7 +711,7 @@ a{color:inherit}
   <div class="card">
     <h2>🎤 Host the Auction</h2>
     <div class="info-box">Host is the <strong>auctioneer only</strong> — you control the auction, call SOLD/Unsold, manage the flow. You do <strong>not</strong> bid or have a team.<br>
-    <strong>Official rules enforced:</strong> ₹120Cr purse · Max 25 players · Max 8 overseas · Min 7 uncapped Indians</div>
+    <strong>Official rules enforced:</strong> ₹120Cr purse · Max 20 players · Max 8 overseas</div>
     <div class="f"><label>Number of Bidding Teams</label>
       <select id="h-num">
         <option value="2">2 Teams</option><option value="3">3 Teams</option><option value="4" selected>4 Teams</option>
@@ -770,8 +770,8 @@ a{color:inherit}
     <div class="teams-grid" id="lob-grid"></div>
     <div class="rules">
       <strong>📋 Official IPL Rules enforced:</strong><br>
-      💰 ₹120 Cr purse per team · Max 25 players · Min 18 players<br>
-      🌍 Max 8 overseas players · Min 7 uncapped Indian players<br>
+      💰 ₹120 Cr purse per team · Max 20 players · Min 18 players<br>
+      🌍 Max 8 overseas players<br>
       ⏱ 30-sec timer resets on each new bid<br>
       📈 Bid increments: ₹5L (under ₹1Cr) → ₹10L → ₹25L → ₹50L → ₹1Cr<br>
       ⭐ Marquee players go first · Unsold players re-listed at end
@@ -1140,7 +1140,7 @@ const PL=[
 
 // ═══════ CONSTANTS ═══════
 const COLORS=["#FFD700","#00C851","#4A90D9","#FF6B6B","#B44FE8","#FF8C00","#00CED1","#FF69B4","#7CFC00","#FF4500"];
-const PURSE=12000,MAX_P=25,MIN_P=18,MAX_OVERSEAS=8,MIN_UNCAPPED=7,MIN_R=5,SECS=30;
+const PURSE=12000,MAX_P=20,MIN_P=18,MAX_OVERSEAS=8,MIN_R=5,SECS=30;
 const C76=194.8,C62=163.4;
 
 // ═══════ STATE ═══════
@@ -1256,19 +1256,15 @@ function setTeam(name){el('j-team').value=name;}
 // ═══════ RESTRICTION CHECKER ═══════
 function getRules(t){
   const ov=t.players.filter(p=>p.overseas).length;
-  const un=t.players.filter(p=>!p.cap&&!p.overseas).length;
   const tot=t.players.length;
-  return{ov,un,tot,ovOk:ov<=MAX_OVERSEAS,ovFull:ov>=MAX_OVERSEAS,unOk:un>=MIN_UNCAPPED,unLow:un<MIN_UNCAPPED,totOk:tot>=MIN_P&&tot<=MAX_P};
+  return{ov,tot,ovOk:ov<=MAX_OVERSEAS,ovFull:ov>=MAX_OVERSEAS,totOk:tot>=MIN_P&&tot<=MAX_P};
 }
 function canBid(t,p){
   const r=getRules(t);
   const nb=G.bidder?G.bid+inc(G.bid):p.b;
   if(t.purse-nb<MIN_R) return{ok:false,reason:'Insufficient purse'};
-  if(t.players.length>=MAX_P) return{ok:false,reason:'Squad full (25/25)'};
+  if(t.players.length>=MAX_P) return{ok:false,reason:`Squad full (${MAX_P}/${MAX_P})`};
   if(p.overseas&&r.ov>=MAX_OVERSEAS) return{ok:false,reason:'Overseas limit (8/8)'};
-  const slotsLeft=MAX_P-t.players.length;
-  const uncapNeeded=Math.max(0,MIN_UNCAPPED-r.un);
-  if(!p.overseas&&p.cap&&uncapNeeded>0&&uncapNeeded>=slotsLeft) return{ok:false,reason:`Need ${uncapNeeded} uncapped in ${slotsLeft} slots`};
   return{ok:true};
 }
 
@@ -1945,7 +1941,6 @@ function renderHostUI(){
     const r=getRules(t);
     const tags=[
       `<span class="tag ${r.ovFull?'tag-warn':'tag-ok'}">${r.ov}/8 OV</span>`,
-      `<span class="tag ${r.unOk?'tag-ok':'tag-warn'}">${r.un}/${MIN_UNCAPPED} UC</span>`,
       `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-warn'}">${r.tot}/${MAX_P}</span>`,
       `${(G.passed||{})[t.id]?'<span class="tag tag-err">Passed</span>':''}`,
     ].join('');
@@ -2045,7 +2040,6 @@ function renderBidderUI(){
     const r=getRules(me);
     el('b-restrict').innerHTML=[
       `<span class="rb-item ${r.ovFull?'rb-warn':'rb-ok'}">${r.ov}/8 Overseas${r.ovFull?' FULL':''}</span>`,
-      `<span class="rb-item ${r.unOk?'rb-ok':'rb-warn'}">${r.un}/${MIN_UNCAPPED} Uncapped${r.unLow?' ⚠️':''}</span>`,
       `<span class="rb-item ${r.tot>=MAX_P?'rb-err':r.tot>=MIN_P?'rb-ok':'rb-warn'}">${r.tot}/${MAX_P} Players</span>`,
       `<span class="rb-item rb-ok">${F(me.purse)} Left</span>`,
     ].join('');
@@ -2107,13 +2101,18 @@ function renderSquadsTab(){
   el('b-squads-content').innerHTML=G.teams.map(t=>{
     const r=getRules(t);
     const rows=t.players.map(p=>`<div class="sp-row">
-      <div><div class="sp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div><div class="sp-r"><span class="r-${p.r}" style="padding:1px 4px;border-radius:3px;font-size:.58rem;font-weight:700">${RL(p.r)}</span> · ${p.c}</div></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <div class="sp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div>
+          ${p.rat?ratMiniBadge(p.rat):''}
+        </div>
+        <div class="sp-r"><span class="r-${p.r}" style="padding:1px 4px;border-radius:3px;font-size:.58rem;font-weight:700">${RL(p.r)}</span> · ${p.c}${p.overseas?' 🌍':''}</div>
+      </div>
       <div class="sp-p">${F(p.sp)}</div>
     </div>`).join('')||'<div style="color:#444;padding:8px;font-size:.75rem">No players yet</div>';
     const tags=[
       `<span class="rb-item ${r.ovFull?'rb-warn':'rb-ok'}" style="font-size:.57rem">${r.ov}/8 OV</span>`,
-      `<span class="rb-item ${r.unOk?'rb-ok':'rb-warn'}" style="font-size:.57rem">${r.un}/${MIN_UNCAPPED} UC</span>`,
-      `<span class="rb-item ${r.tot>=MIN_P?'rb-ok':'rb-warn'}" style="font-size:.57rem">${r.tot} Players</span>`,
+      `<span class="rb-item ${r.tot>=MIN_P?'rb-ok':'rb-warn'}" style="font-size:.57rem">${r.tot}/${MAX_P} Players</span>`,
     ].join('');
     const isMe=t.id===myTid;
     return`<div class="squad-card" style="border-color:${isMe?t.color+'55':'var(--b1)'}">
@@ -2232,13 +2231,18 @@ function renderRes(){
   el('res-grid').innerHTML=G.teams.map(t=>{
     const spent=PURSE-t.purse;const r=getRules(t);
     const rows=t.players.map(p=>`<div class="rp">
-      <div><div class="rp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div><div class="rp-r r-${p.r}">${RL(p.r)} · ${p.c}${p.overseas?' 🌍':''}${!p.cap&&!p.overseas?' 🔓':''}</div></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">
+          <div class="rp-n" style="cursor:pointer" onclick="openProfile(${p.id})">${p.n}</div>
+          ${p.rat?ratMiniBadge(p.rat):''}
+        </div>
+        <div class="rp-r r-${p.r}">${RL(p.r)} · ${p.c}${p.overseas?' 🌍':''}</div>
+      </div>
       <div class="rp-p">${F(p.sp)}</div>
     </div>`).join('')||'<div style="color:#444;padding:8px;font-size:.8rem">No players</div>';
     const tags=[
       `<span class="tag ${r.ovFull?'tag-warn':'tag-ok'}">${r.ov}/8 Overseas</span>`,
-      `<span class="tag ${r.unOk?'tag-ok':'tag-err'}">${r.un}/${MIN_UNCAPPED} Uncapped</span>`,
-      `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-err'}">${r.tot} Players</span>`,
+      `<span class="tag ${r.tot>=MIN_P?'tag-ok':'tag-err'}">${r.tot}/${MAX_P} Players</span>`,
     ].join('');
     return`<div class="rc"><div class="rc-hdr" style="background:${t.color}15;border-bottom:2px solid ${t.color}33">
       <div class="rc-ic" style="background:${t.color}">${t.name.slice(0,2).toUpperCase()}</div>
