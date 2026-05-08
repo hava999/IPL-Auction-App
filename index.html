@@ -616,6 +616,28 @@ body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);co
 .conn-status.bad{color:var(--rd)}
 .conn-status.bad .conn-dot{background:#ff3b30;animation:blink .5s infinite}
 
+/* ══ CRICKET 24 RATING BADGE ══ */
+.rat-badge{
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:52px;height:52px;border-radius:10px;font-weight:900;
+  border:2px solid rgba(255,255,255,.15);
+  box-shadow:0 4px 14px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.1) inset;
+  flex-shrink:0;line-height:1;
+}
+.rat-num{font-size:1.3rem;letter-spacing:-.5px}
+.rat-lbl{font-size:.38rem;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-top:1px}
+.rat-90{background:linear-gradient(135deg,#a16207,#ca8a04,#eab308);color:#fff}
+.rat-85{background:linear-gradient(135deg,#15803d,#16a34a,#22c55e);color:#fff}
+.rat-80{background:linear-gradient(135deg,#1d4ed8,#2563eb,#3b82f6);color:#fff}
+.rat-75{background:linear-gradient(135deg,#0e7490,#0891b2,#22d3ee);color:#fff}
+.rat-70{background:linear-gradient(135deg,#c2410c,#ea580c,#f97316);color:#fff}
+.rat-60{background:linear-gradient(135deg,#374151,#4b5563,#6b7280);color:#fff}
+/* inline mini badge for bidder card */
+.rat-mini{
+  display:inline-flex;align-items:center;gap:3px;border-radius:6px;
+  padding:3px 8px;font-weight:800;font-size:.7rem;border:1px solid rgba(255,255,255,.12);
+}
+
 /* ══ PLAYER CARD SHIMMER ══ */
 @keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
 .stage::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,215,0,.04),transparent);background-size:200% auto;animation:shimmer 4s linear infinite;pointer-events:none;border-radius:16px}
@@ -891,6 +913,7 @@ a{color:inherit}
         <div id="b-photo-wrap" style="margin:6px auto 8px;width:72px"></div>
         <div class="bid-pn" id="b-pn">—</div>
         <span class="bid-pr" id="b-pr">—</span>
+        <div id="b-rat-badge" style="margin:4px 0 6px;display:flex;justify-content:center"></div>
         <div class="bid-pmeta" id="b-pmeta"></div>
         <div class="bid-stats-row" id="b-stats-row"></div>
       </div>
@@ -1028,91 +1051,91 @@ a{color:inherit}
 // PLAYER DATABASE — 85 players, full IPL 2025/26 pool
 // ═══════════════════════════════════════════════════
 const PL=[
-  {id:1,n:"Rishabh Pant",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:931581},
-  {id:2,n:"Shreyas Iyer",r:"BAT",c:"India",b:200,cap:1,mq:1,overseas:0,cid:642519},
-  {id:3,n:"KL Rahul",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:422108},
-  {id:4,n:"Jos Buttler",r:"WK",c:"England",b:200,cap:1,mq:1,overseas:1,cid:308967},
-  {id:5,n:"Mitchell Starc",r:"BOWL",c:"Australia",b:200,cap:1,mq:1,overseas:1,cid:311592},
-  {id:6,n:"Arshdeep Singh",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:1125338},
-  {id:7,n:"Kagiso Rabada",r:"BOWL",c:"South Africa",b:200,cap:1,mq:1,overseas:1,cid:715355},
-  {id:8,n:"Mohammed Siraj",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:820353},
-  {id:9,n:"Yuzvendra Chahal",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:559235},
-  {id:10,n:"Liam Livingstone",r:"AR",c:"England",b:200,cap:1,mq:1,overseas:1,cid:457754},
-  {id:11,n:"David Miller",r:"BAT",c:"South Africa",b:150,cap:1,mq:1,overseas:1,cid:324383},
-  {id:12,n:"Mohammed Shami",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:277916},
-  {id:13,n:"Rohit Sharma",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:34102},
-  {id:14,n:"Virat Kohli",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:253802},
-  {id:15,n:"MS Dhoni",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:28081},
-  {id:16,n:"Jasprit Bumrah",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:625383},
-  {id:17,n:"Hardik Pandya",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:625371},
-  {id:18,n:"Ravindra Jadeja",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:234675},
-  {id:19,n:"Suryakumar Yadav",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:481896},
-  {id:20,n:"Shubman Gill",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1070173},
-  {id:21,n:"Yashasvi Jaiswal",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1174399},
-  {id:22,n:"Ishan Kishan",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:961823},
-  {id:23,n:"Axar Patel",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:606033},
-  {id:24,n:"Kuldeep Yadav",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:594953},
-  {id:25,n:"Ruturaj Gaikwad",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:969413},
-  {id:26,n:"Tilak Varma",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:1175440},
-  {id:27,n:"Shardul Thakur",r:"AR",c:"India",b:150,cap:1,overseas:0,cid:703963},
-  {id:28,n:"Deepak Chahar",r:"BOWL",c:"India",b:150,cap:1,overseas:0,cid:605307},
-  {id:29,n:"T Natarajan",r:"BOWL",c:"India",b:75,cap:1,overseas:0,cid:746755,wiki:"T._Natarajan"},
-  {id:30,n:"Washington Sundar",r:"AR",c:"India",b:75,cap:1,overseas:0,cid:854128},
-  {id:31,n:"Pat Cummins",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:325012},
-  {id:32,n:"Andre Russell",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:300613},
-  {id:33,n:"Sunil Narine",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:232364},
-  {id:34,n:"Glenn Maxwell",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:374163},
-  {id:35,n:"Rashid Khan",r:"AR",c:"Afghanistan",b:200,cap:1,overseas:1,cid:793463},
-  {id:36,n:"David Warner",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:219889},
-  {id:37,n:"Nicholas Pooran",r:"WK",c:"West Indies",b:150,cap:1,overseas:1,cid:787467},
-  {id:38,n:"Faf du Plessis",r:"BAT",c:"South Africa",b:150,cap:1,overseas:1,cid:44828},
-  {id:39,n:"Trent Boult",r:"BOWL",c:"New Zealand",b:150,cap:1,overseas:1,cid:436757},
-  {id:40,n:"Heinrich Klaasen",r:"WK",c:"South Africa",b:150,cap:1,overseas:1,cid:377534},
-  {id:41,n:"Travis Head",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:547461},
-  {id:42,n:"Marcus Stoinis",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:665356},
-  {id:43,n:"Sam Curran",r:"AR",c:"England",b:200,cap:1,overseas:1,cid:972769},
-  {id:44,n:"Wanindu Hasaranga",r:"AR",c:"Sri Lanka",b:150,cap:1,overseas:1,cid:940371},
-  {id:45,n:"Phil Salt",r:"WK",c:"England",b:150,cap:1,overseas:1,cid:1107041},
-  {id:46,n:"Harry Brook",r:"BAT",c:"England",b:150,cap:1,overseas:1,cid:1121617},
-  {id:47,n:"Marco Jansen",r:"AR",c:"South Africa",b:75,cap:1,overseas:1,cid:1076093},
-  {id:48,n:"Matheesha Pathirana",r:"BOWL",c:"Sri Lanka",b:75,cap:1,overseas:1,cid:1226562},
-  {id:49,n:"Alzarri Joseph",r:"BOWL",c:"West Indies",b:75,cap:1,overseas:1,cid:921989},
-  {id:50,n:"Romario Shepherd",r:"AR",c:"West Indies",b:75,cap:1,overseas:1,cid:1105353},
-  {id:51,n:"Shimron Hetmyer",r:"BAT",c:"West Indies",b:75,cap:1,overseas:1,cid:867630},
-  {id:52,n:"Mujeeb Ur Rahman",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:885535,wiki:"Mujeeb_ur_Rahman"},
-  {id:53,n:"Fazalhaq Farooqi",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1033502},
-  {id:54,n:"Rachin Ravindra",r:"AR",c:"New Zealand",b:75,cap:1,overseas:1,cid:1229096},
-  {id:55,n:"Lockie Ferguson",r:"BOWL",c:"New Zealand",b:100,cap:1,overseas:1,cid:592093},
-  {id:56,n:"Spencer Johnson",r:"BOWL",c:"Australia",b:75,overseas:1,cid:1209302},
-  {id:57,n:"Jake Fraser-McGurk",r:"BAT",c:"Australia",b:30,overseas:1,cid:1207609},
-  {id:58,n:"Dewald Brevis",r:"BAT",c:"South Africa",b:75,overseas:1,cid:1261007},
-  {id:59,n:"Noor Ahmad",r:"BOWL",c:"Afghanistan",b:30,overseas:1,cid:1189918},
-  {id:60,n:"Rahmanullah Gurbaz",r:"WK",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1227845},
-  {id:61,n:"Rinku Singh",r:"BAT",c:"India",b:75,overseas:0,cid:920311,wiki:"Rinku_Singh_(cricketer)"},
-  {id:62,n:"Shivam Dube",r:"AR",c:"India",b:75,overseas:0,cid:788278},
-  {id:63,n:"Ravi Bishnoi",r:"BOWL",c:"India",b:75,overseas:0,cid:1092426},
-  {id:64,n:"Khaleel Ahmed",r:"BOWL",c:"India",b:75,overseas:0,cid:736468},
-  {id:65,n:"Jitesh Sharma",r:"WK",c:"India",b:50,overseas:0,cid:966158},
-  {id:66,n:"Dhruv Jurel",r:"WK",c:"India",b:40,overseas:0,cid:1173434},
-  {id:67,n:"Abhishek Sharma",r:"AR",c:"India",b:40,overseas:0,cid:947558,wiki:"Abhishek_Sharma_(cricketer)"},
-  {id:68,n:"Sai Sudharsan",r:"BAT",c:"India",b:40,overseas:0,cid:1175429},
-  {id:69,n:"Nitish Kumar Reddy",r:"AR",c:"India",b:30,overseas:0,cid:1340499},
-  {id:70,n:"Devdutt Padikkal",r:"BAT",c:"India",b:75,overseas:0,cid:1079938},
-  {id:71,n:"Riyan Parag",r:"BAT",c:"India",b:30,overseas:0,cid:1178057},
-  {id:72,n:"Harshit Rana",r:"BOWL",c:"India",b:30,overseas:0,cid:1283431},
-  {id:73,n:"Mayank Yadav",r:"BOWL",c:"India",b:30,overseas:0,cid:1251327},
-  {id:74,n:"Ramandeep Singh",r:"AR",c:"India",b:30,overseas:0,cid:1082750,wiki:"Ramandeep_Singh_(cricketer)"},
-  {id:75,n:"Shahrukh Khan",r:"BAT",c:"India",b:30,overseas:0,cid:1096225,wiki:"Shahrukh_Khan_(cricketer)"},
-  {id:76,n:"Ayush Badoni",r:"BAT",c:"India",b:20,overseas:0,cid:1178078},
-  {id:77,n:"Arjun Tendulkar",r:"BOWL",c:"India",b:20,overseas:0,cid:1188305},
-  {id:78,n:"Yash Dayal",r:"BOWL",c:"India",b:30,overseas:0,cid:1175458},
-  {id:79,n:"Tushar Deshpande",r:"BOWL",c:"India",b:20,overseas:0,cid:969428},
-  {id:80,n:"Swapnil Singh",r:"AR",c:"India",b:20,overseas:0,cid:1100095},
-  {id:81,n:"Nehal Wadhera",r:"BAT",c:"India",b:20,overseas:0,cid:1175454},
-  {id:82,n:"Suyash Sharma",r:"BOWL",c:"India",b:20,overseas:0,cid:1326571},
-  {id:83,n:"Abishek Porel",r:"WK",c:"India",b:20,overseas:0,cid:1340503},
-  {id:84,n:"Vijaykumar Vyshak",r:"BOWL",c:"India",b:20,overseas:0,cid:1100196},
-  {id:85,n:"Anuj Rawat",r:"WK",c:"India",b:20,overseas:0,cid:1263718},
+  {id:1,n:"Rishabh Pant",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:931581,rat:88},
+  {id:2,n:"Shreyas Iyer",r:"BAT",c:"India",b:200,cap:1,mq:1,overseas:0,cid:642519,rat:83},
+  {id:3,n:"KL Rahul",r:"WK",c:"India",b:200,cap:1,mq:1,overseas:0,cid:422108,rat:86},
+  {id:4,n:"Jos Buttler",r:"WK",c:"England",b:200,cap:1,mq:1,overseas:1,cid:308967,rat:88},
+  {id:5,n:"Mitchell Starc",r:"BOWL",c:"Australia",b:200,cap:1,mq:1,overseas:1,cid:311592,rat:87},
+  {id:6,n:"Arshdeep Singh",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:1125338,rat:82},
+  {id:7,n:"Kagiso Rabada",r:"BOWL",c:"South Africa",b:200,cap:1,mq:1,overseas:1,cid:715355,rat:88},
+  {id:8,n:"Mohammed Siraj",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:820353,rat:83},
+  {id:9,n:"Yuzvendra Chahal",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:559235,rat:82},
+  {id:10,n:"Liam Livingstone",r:"AR",c:"England",b:200,cap:1,mq:1,overseas:1,cid:457754,rat:82},
+  {id:11,n:"David Miller",r:"BAT",c:"South Africa",b:150,cap:1,mq:1,overseas:1,cid:324383,rat:82},
+  {id:12,n:"Mohammed Shami",r:"BOWL",c:"India",b:200,cap:1,mq:1,overseas:0,cid:277916,rat:88},
+  {id:13,n:"Rohit Sharma",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:34102,rat:91},
+  {id:14,n:"Virat Kohli",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:253802,rat:95},
+  {id:15,n:"MS Dhoni",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:28081,rat:89},
+  {id:16,n:"Jasprit Bumrah",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:625383,rat:95},
+  {id:17,n:"Hardik Pandya",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:625371,rat:85},
+  {id:18,n:"Ravindra Jadeja",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:234675,rat:90},
+  {id:19,n:"Suryakumar Yadav",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:481896,rat:88},
+  {id:20,n:"Shubman Gill",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1070173,rat:85},
+  {id:21,n:"Yashasvi Jaiswal",r:"BAT",c:"India",b:200,cap:1,overseas:0,cid:1174399,rat:84},
+  {id:22,n:"Ishan Kishan",r:"WK",c:"India",b:200,cap:1,overseas:0,cid:961823,rat:81},
+  {id:23,n:"Axar Patel",r:"AR",c:"India",b:200,cap:1,overseas:0,cid:606033,rat:83},
+  {id:24,n:"Kuldeep Yadav",r:"BOWL",c:"India",b:200,cap:1,overseas:0,cid:594953,rat:83},
+  {id:25,n:"Ruturaj Gaikwad",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:969413,rat:80},
+  {id:26,n:"Tilak Varma",r:"BAT",c:"India",b:75,cap:1,overseas:0,cid:1175440,rat:77},
+  {id:27,n:"Shardul Thakur",r:"AR",c:"India",b:150,cap:1,overseas:0,cid:703963,rat:78},
+  {id:28,n:"Deepak Chahar",r:"BOWL",c:"India",b:150,cap:1,overseas:0,cid:605307,rat:78},
+  {id:29,n:"T Natarajan",r:"BOWL",c:"India",b:75,cap:1,overseas:0,cid:746755,wiki:"T._Natarajan",rat:75},
+  {id:30,n:"Washington Sundar",r:"AR",c:"India",b:75,cap:1,overseas:0,cid:854128,rat:78},
+  {id:31,n:"Pat Cummins",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:325012,rat:91},
+  {id:32,n:"Andre Russell",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:300613,rat:88},
+  {id:33,n:"Sunil Narine",r:"AR",c:"West Indies",b:200,cap:1,overseas:1,cid:232364,rat:87},
+  {id:34,n:"Glenn Maxwell",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:374163,rat:85},
+  {id:35,n:"Rashid Khan",r:"AR",c:"Afghanistan",b:200,cap:1,overseas:1,cid:793463,rat:90},
+  {id:36,n:"David Warner",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:219889,rat:89},
+  {id:37,n:"Nicholas Pooran",r:"WK",c:"West Indies",b:150,cap:1,overseas:1,cid:787467,rat:83},
+  {id:38,n:"Faf du Plessis",r:"BAT",c:"South Africa",b:150,cap:1,overseas:1,cid:44828,rat:85},
+  {id:39,n:"Trent Boult",r:"BOWL",c:"New Zealand",b:150,cap:1,overseas:1,cid:436757,rat:85},
+  {id:40,n:"Heinrich Klaasen",r:"WK",c:"South Africa",b:150,cap:1,overseas:1,cid:377534,rat:84},
+  {id:41,n:"Travis Head",r:"BAT",c:"Australia",b:150,cap:1,overseas:1,cid:547461,rat:88},
+  {id:42,n:"Marcus Stoinis",r:"AR",c:"Australia",b:200,cap:1,overseas:1,cid:665356,rat:82},
+  {id:43,n:"Sam Curran",r:"AR",c:"England",b:200,cap:1,overseas:1,cid:972769,rat:81},
+  {id:44,n:"Wanindu Hasaranga",r:"AR",c:"Sri Lanka",b:150,cap:1,overseas:1,cid:940371,rat:83},
+  {id:45,n:"Phil Salt",r:"WK",c:"England",b:150,cap:1,overseas:1,cid:1107041,rat:81},
+  {id:46,n:"Harry Brook",r:"BAT",c:"England",b:150,cap:1,overseas:1,cid:1121617,rat:85},
+  {id:47,n:"Marco Jansen",r:"AR",c:"South Africa",b:75,cap:1,overseas:1,cid:1076093,rat:79},
+  {id:48,n:"Matheesha Pathirana",r:"BOWL",c:"Sri Lanka",b:75,cap:1,overseas:1,cid:1226562,rat:79},
+  {id:49,n:"Alzarri Joseph",r:"BOWL",c:"West Indies",b:75,cap:1,overseas:1,cid:921989,rat:78},
+  {id:50,n:"Romario Shepherd",r:"AR",c:"West Indies",b:75,cap:1,overseas:1,cid:1105353,rat:76},
+  {id:51,n:"Shimron Hetmyer",r:"BAT",c:"West Indies",b:75,cap:1,overseas:1,cid:867630,rat:79},
+  {id:52,n:"Mujeeb Ur Rahman",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:885535,wiki:"Mujeeb_ur_Rahman",rat:79},
+  {id:53,n:"Fazalhaq Farooqi",r:"BOWL",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1033502,rat:78},
+  {id:54,n:"Rachin Ravindra",r:"AR",c:"New Zealand",b:75,cap:1,overseas:1,cid:1229096,rat:80},
+  {id:55,n:"Lockie Ferguson",r:"BOWL",c:"New Zealand",b:100,cap:1,overseas:1,cid:592093,rat:79},
+  {id:56,n:"Spencer Johnson",r:"BOWL",c:"Australia",b:75,overseas:1,cid:1209302,rat:74},
+  {id:57,n:"Jake Fraser-McGurk",r:"BAT",c:"Australia",b:30,overseas:1,cid:1207609,rat:77},
+  {id:58,n:"Dewald Brevis",r:"BAT",c:"South Africa",b:75,overseas:1,cid:1261007,rat:75},
+  {id:59,n:"Noor Ahmad",r:"BOWL",c:"Afghanistan",b:30,overseas:1,cid:1189918,rat:76},
+  {id:60,n:"Rahmanullah Gurbaz",r:"WK",c:"Afghanistan",b:75,cap:1,overseas:1,cid:1227845,rat:78},
+  {id:61,n:"Rinku Singh",r:"BAT",c:"India",b:75,overseas:0,cid:920311,wiki:"Rinku_Singh_(cricketer)",rat:76},
+  {id:62,n:"Shivam Dube",r:"AR",c:"India",b:75,overseas:0,cid:788278,rat:75},
+  {id:63,n:"Ravi Bishnoi",r:"BOWL",c:"India",b:75,overseas:0,cid:1092426,rat:77},
+  {id:64,n:"Khaleel Ahmed",r:"BOWL",c:"India",b:75,overseas:0,cid:736468,rat:73},
+  {id:65,n:"Jitesh Sharma",r:"WK",c:"India",b:50,overseas:0,cid:966158,rat:72},
+  {id:66,n:"Dhruv Jurel",r:"WK",c:"India",b:40,overseas:0,cid:1173434,rat:72},
+  {id:67,n:"Abhishek Sharma",r:"AR",c:"India",b:40,overseas:0,cid:947558,wiki:"Abhishek_Sharma_(cricketer)",rat:74},
+  {id:68,n:"Sai Sudharsan",r:"BAT",c:"India",b:40,overseas:0,cid:1175429,rat:74},
+  {id:69,n:"Nitish Kumar Reddy",r:"AR",c:"India",b:30,overseas:0,cid:1340499,rat:72},
+  {id:70,n:"Devdutt Padikkal",r:"BAT",c:"India",b:75,overseas:0,cid:1079938,rat:74},
+  {id:71,n:"Riyan Parag",r:"BAT",c:"India",b:30,overseas:0,cid:1178057,rat:72},
+  {id:72,n:"Harshit Rana",r:"BOWL",c:"India",b:30,overseas:0,cid:1283431,rat:72},
+  {id:73,n:"Mayank Yadav",r:"BOWL",c:"India",b:30,overseas:0,cid:1251327,rat:74},
+  {id:74,n:"Ramandeep Singh",r:"AR",c:"India",b:30,overseas:0,cid:1082750,wiki:"Ramandeep_Singh_(cricketer)",rat:68},
+  {id:75,n:"Shahrukh Khan",r:"BAT",c:"India",b:30,overseas:0,cid:1096225,wiki:"Shahrukh_Khan_(cricketer)",rat:70},
+  {id:76,n:"Ayush Badoni",r:"BAT",c:"India",b:20,overseas:0,cid:1178078,rat:68},
+  {id:77,n:"Arjun Tendulkar",r:"BOWL",c:"India",b:20,overseas:0,cid:1188305,rat:64},
+  {id:78,n:"Yash Dayal",r:"BOWL",c:"India",b:30,overseas:0,cid:1175458,rat:71},
+  {id:79,n:"Tushar Deshpande",r:"BOWL",c:"India",b:20,overseas:0,cid:969428,rat:69},
+  {id:80,n:"Swapnil Singh",r:"AR",c:"India",b:20,overseas:0,cid:1100095,rat:66},
+  {id:81,n:"Nehal Wadhera",r:"BAT",c:"India",b:20,overseas:0,cid:1175454,rat:66},
+  {id:82,n:"Suyash Sharma",r:"BOWL",c:"India",b:20,overseas:0,cid:1326571,rat:68},
+  {id:83,n:"Abishek Porel",r:"WK",c:"India",b:20,overseas:0,cid:1340503,rat:67},
+  {id:84,n:"Vijaykumar Vyshak",r:"BOWL",c:"India",b:20,overseas:0,cid:1100196,rat:68},
+  {id:85,n:"Anuj Rawat",r:"WK",c:"India",b:20,overseas:0,cid:1263718,rat:67},
 ];
 
 // ═══════ CONSTANTS ═══════
@@ -1757,7 +1780,7 @@ function renderPickList(){
     <div class="pick-item${p._src==='unsold'?' unsold-p':''}" onclick="pickPlayer(${p.id})">
       <div class="pick-left">
         <div class="pick-n">${p.n}${p.mq?' ⭐':''}</div>
-        <div class="pick-m"><span class="r-${p.r}" style="padding:1px 5px;border-radius:3px;font-size:.6rem;font-weight:700">${RL(p.r)}</span> · ${p.c} · ${p.cap?'Capped':'Uncapped'} · ${p._src==='unsold'?'<span style="color:#ff8888">Unsold</span>':'In Queue'}</div>
+        <div class="pick-m"><span class="r-${p.r}" style="padding:1px 5px;border-radius:3px;font-size:.6rem;font-weight:700">${RL(p.r)}</span> · ${p.c} · ${p.cap?'Capped':'Uncapped'} · ${p._src==='unsold'?'<span style="color:#ff8888">Unsold</span>':'In Queue'}${p.rat?` · <span style="font-weight:800;color:var(--g)">🎮 ${p.rat}</span>`:''}</div>
       </div>
       <div class="pick-p">${F(p.b)}</div>
     </div>`).join('')||'<div style="padding:20px;text-align:center;color:#444;font-size:.82rem">No players found</div>';
@@ -1885,7 +1908,10 @@ function renderHostUI(){
   }
   const plk=statsLinks(p);
   stage.innerHTML=`<div class="st-lot">LOT ${G.idx+1}/${G.Q.length}${p.mq?' ⭐ MARQUEE':''}</div>
-    <div style="margin:6px auto 8px">${playerAvatarHtml(p,80)}</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin:6px auto 8px">
+      ${playerAvatarHtml(p,80)}
+      ${ratBadgeHtml(p.rat)}
+    </div>
     <div class="st-name">${p.n}</div>
     <span class="st-role r-${p.r}">${RL(p.r)}</span>
     <div class="st-grid">
@@ -1987,6 +2013,7 @@ function renderBidderUI(){
     <div class="bpm"><div class="bpm-v">${p.c}</div><div class="bpm-l">Nation</div></div>
     <div class="bpm"><div class="bpm-v">${F(p.b)}</div><div class="bpm-l">Base</div></div>
     <div class="bpm"><div class="bpm-v">${p.cap?'✅ Capped':'🔓 Uncapped'}</div><div class="bpm-l">Status</div></div>`;
+  const ratEl=el('b-rat-badge');if(ratEl) ratEl.innerHTML=ratMiniBadge(p.rat);
   // Player photo in bidder card
   const bphotoWrap=el('b-photo-wrap');
   if(bphotoWrap){bphotoWrap.innerHTML=playerAvatarHtml(p,72);schedulePhotoLoad(p);}
@@ -2255,6 +2282,17 @@ function renderHostLog(){
 function inc(b){return b<100?5:b<200?10:b<500?25:b<1000?50:100;}
 function F(l){return l>=100?`₹${(l/100).toFixed(l%100===0?0:2)} Cr`:`₹${l} L`;}
 function RL(r){return{BAT:'Batsman',BOWL:'Bowler',AR:'All-Rounder',WK:'Wicket-Keeper'}[r]||r;}
+function ratTier(v){return v>=90?'90':v>=85?'85':v>=80?'80':v>=75?'75':v>=70?'70':'60';}
+function ratBadgeHtml(rat){
+  if(!rat) return '';
+  return `<div class="rat-badge rat-${ratTier(rat)}"><span class="rat-num">${rat}</span><span class="rat-lbl">C24 OVR</span></div>`;
+}
+function ratMiniBadge(rat){
+  if(!rat) return '';
+  const t=ratTier(rat);
+  const bg={90:'linear-gradient(135deg,#a16207,#ca8a04)',85:'linear-gradient(135deg,#15803d,#16a34a)',80:'linear-gradient(135deg,#1d4ed8,#2563eb)',75:'linear-gradient(135deg,#0e7490,#0891b2)',70:'linear-gradient(135deg,#c2410c,#ea580c)',60:'linear-gradient(135deg,#374151,#4b5563)'}[t];
+  return `<span class="rat-mini" style="background:${bg};color:#fff;border-color:rgba(255,255,255,.15)">🎮 ${rat} OVR</span>`;
+}
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));el(id)?.classList.add('on');}
 function el(id){return document.getElementById(id);}
 function v(id){return(el(id)?.value||'').trim();}
