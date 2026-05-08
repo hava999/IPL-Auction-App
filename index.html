@@ -1505,7 +1505,7 @@ function doJoin(){
   bidderPeer.on('open',()=>{attachBidderConnHandlers(code);});
   bidderPeer.on('error',e=>{
     if(e.type==='unavailable-id'){
-      // Our saved peer ID is still registered on the signaling server — wait and retry
+      myTid=''; // force a fresh peer ID on retry
       setTimeout(()=>{if(roomCode) doJoin();},1500);
       return;
     }
