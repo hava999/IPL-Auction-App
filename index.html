@@ -2418,6 +2418,57 @@ function playerAvatarHtml(p,sz=88){
 }
 window.addEventListener('beforeunload',persistSession);
 maybeRestoreSession();
+
+// ═══════ ONE-TIME SESSION RESTORE (run restoreAuction() in console) ═══════
+function restoreAuction(){
+  const COLORS_R=["#FFD700","#00C851","#4A90D9","#FF6B6B"];
+  const raw=[
+    {name:"Nanhe Jihadi X1",owner:"Harsh",ci:0,sales:[
+      ["KL Rahul",1200],["Arshdeep Singh",900],["Yuzvendra Chahal",1300],
+      ["Sunil Narine",475],["Shardul Thakur",275],["Devdutt Padikkal",200],
+      ["Noor Ahmad",35],["Jasprit Bumrah",325],["Rachin Ravindra",85],
+      ["Phil Salt",900],["Heinrich Klaasen",1600]
+    ]},
+    {name:"power Rangers",owner:"Bhagath",ci:1,sales:[
+      ["Rishabh Pant",900],["Shreyas Iyer",1500],["Mitchell Starc",900],
+      ["Mohammed Siraj",600],["Harshit Rana",200],["Jitesh Sharma",85],
+      ["Suyash Sharma",90],["Ishan Kishan",1200],["Dewald Brevis",90],
+      ["Harry Brook",150],["Kuldeep Yadav",1500],["Jake Fraser-McGurk",35]
+    ]},
+    {name:"Hava Kings",owner:"Harsha",ci:2,sales:[
+      ["Hardik Pandya",1600],["Glenn Maxwell",350],["MS Dhoni",1700],
+      ["Shimron Hetmyer",150],["Ramandeep Singh",35],["Nicholas Pooran",1900],
+      ["Pat Cummins",950],["Rinku Singh",425],["Suryakumar Yadav",500],
+      ["Deepak Chahar",150]
+    ]},
+    {name:"MM mithaiwala",owner:"Magician",ci:3,sales:[
+      ["Jos Buttler",1200],["Kagiso Rabada",750],["Liam Livingstone",300],
+      ["David Miller",650],["Mohammed Shami",1400],["Khaleel Ahmed",85],
+      ["Washington Sundar",550],["Riyan Parag",60],["Yashasvi Jaiswal",1300],
+      ["Shivam Dube",800],["Rahmanullah Gurbaz",80]
+    ]}
+  ];
+  const builtTeams=raw.map(t=>{
+    const players=t.sales.map(([nm,sp])=>{
+      const p=PL.find(x=>x.n===nm);
+      if(!p){console.warn('NOT FOUND:',nm);return null;}
+      return{...p,sp};
+    }).filter(Boolean);
+    return{id:'rt-'+t.ci,name:t.name,owner:t.owner,color:COLORS_R[t.ci],
+           purse:12000-players.reduce((s,p)=>s+p.sp,0),players};
+  });
+  const soldIds=new Set(builtTeams.flatMap(t=>t.players.map(p=>p.id)));
+  const kohli=PL.find(p=>p.n==='Virat Kohli');
+  const Q=[kohli,...PL.filter(p=>!soldIds.has(p.id)&&p.id!==kohli.id)];
+  const session={amHost:true,roomCode:'VIRAT1',myTid:'',myName:'',myTeamName:'',
+    myDisplayName:'Host',
+    G:{teams:builtTeams,Q,unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
+       ts:Date.now(),phase:'bidding',sold:44,unsold:0,skipped:0,numT:4,
+       paused:true,pauseRem:30,relisted:false,passed:{},chat:[]},
+    bidHistory:[],auctionLog:[],watchlist:[],savedAt:Date.now()};
+  localStorage.setItem('ipl-auction-session-v2',JSON.stringify(session));
+  console.log('%c✅ Session saved! Room code: VIRAT1 — now refresh the page.','color:lime;font-size:14px;font-weight:bold');
+}
 </script>
 </body>
 </html>
