@@ -1212,23 +1212,28 @@ function maybeRestoreSession(){
   const s=loadSession();
   if(!s||!s.roomCode) return;
   _pendingSession=s;
-  // Pre-hydrate just enough to read names
   const savedAmHost=!!s.amHost;
   const savedRoom=s.roomCode||'';
   const savedTeam=s.myTeamName||'';
   const savedName=s.myName||'';
   const savedPhase=s.G?.phase||'lobby';
+  // Auto-restore host sessions that were mid-auction — no banner needed
+  if(savedAmHost&&savedPhase!=='lobby'&&savedPhase!=='done'){
+    hydrateFromSnapshot(_pendingSession);
+    _pendingSession=null;
+    recoverHostSession();
+    return;
+  }
   // Pre-fill join fields for bidder sessions
   if(!savedAmHost){
     if(savedName) el('j-name').value=savedName;
     if(savedTeam) el('j-team').value=savedTeam;
     if(savedRoom) el('j-code').value=savedRoom;
   }
-  // Show resume banner
   const banner=el('resume-banner');
   const meta=el('rb-meta-text');
   if(savedAmHost){
-    meta.innerHTML=`<strong>Host room:</strong> ${savedRoom} &nbsp;·&nbsp; <strong>Status:</strong> ${savedPhase==='done'?'Auction finished':savedPhase==='lobby'?'In lobby':'Auction in progress'}`;
+    meta.innerHTML=`<strong>Host room:</strong> ${savedRoom} &nbsp;·&nbsp; <strong>Status:</strong> ${savedPhase==='done'?'Auction finished':'In lobby'}`;
   } else {
     meta.innerHTML=`<strong>Team:</strong> ${savedTeam} &nbsp;·&nbsp; <strong>Room:</strong> ${savedRoom} &nbsp;·&nbsp; <strong>Status:</strong> ${savedPhase==='done'?'Finished':savedPhase==='lobby'?'In lobby':'In progress'}`;
   }
@@ -1244,11 +1249,11 @@ function confirmResume(){
   else recoverBidderSession();
 }
 function dismissResume(){
+  if(!confirm('Start fresh? This will permanently delete your saved session and cannot be undone.')) return;
   const banner=el('resume-banner');
   if(banner) banner.style.display='none';
   _pendingSession=null;
   clearSession();
-  // Clear pre-filled fields only if user wants fresh start
   el('j-name').value='';el('j-team').value='';el('j-code').value='';
   amHost=false;myTid='';myName='';myTeamName='';roomCode='';myDisplayName='Host';G.phase='lobby';
 }
