@@ -1342,13 +1342,20 @@ function updateConnCount(){
 }
 function handleBidderMsg(conn,msg){
   if(msg.type==='JOIN'){
-    const exists=G.teams.find(t=>t.id===conn.peer);
-    if(!exists&&G.teams.length<G.numT){
+    const existsById=G.teams.find(t=>t.id===conn.peer);
+    const existsByName=!existsById&&G.teams.find(t=>t.name===msg.name&&t.owner===msg.owner);
+    if(existsById){
+      conn.send({type:'STATE',G});
+    } else if(existsByName){
+      existsByName.id=conn.peer;
+      broadcast();
+      systemChat(`${existsByName.name} reconnected`);
+    } else if(G.teams.length<G.numT){
       const idx=G.teams.length;
       G.teams.push({id:conn.peer,name:msg.name,owner:msg.owner,color:COLORS[idx%COLORS.length],purse:PURSE,players:[]});
       systemChat(`${msg.name} joined the room`);
       broadcast();
-    } else if(exists){conn.send({type:'STATE',G});}
+    }
     renderLobby();
   }
   if(msg.type==='BID'){
