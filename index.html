@@ -1377,7 +1377,7 @@ function handleBidderMsg(conn,msg){
     if(!G.bidder){
       const allEffectivePassed=G.teams.every(t=>{
         if(G.passed[t.id]) return true;
-        const{ok}=canBid(t,p);return !ok; // can't bid = effectively passed
+        const{ok}=canBid(t,p);return !ok;
       });
       if(allEffectivePassed){
         clearTimeout(_autoUnsoldTimer);
@@ -1386,6 +1386,15 @@ function handleBidderMsg(conn,msg){
         },1500);
       }
     }
+  }
+  if(msg.type==='UNPASS'){
+    if(G.phase!=='bidding'||G.paused) return;
+    const p=G.Q[G.idx];if(!p) return;
+    if(msg.pid!==p.id) return;
+    G.passed=G.passed||{};
+    delete G.passed[conn.peer];
+    clearTimeout(_autoUnsoldTimer);_autoUnsoldTimer=null;
+    broadcast();
   }
   if(msg.type==='CHAT'){
     const t=G.teams.find(t=>t.id===conn.peer);
@@ -1498,7 +1507,8 @@ function doBid(){if(!bidderConn||G.phase!=='bidding'||G.paused) return;bidderCon
 function passOnPlayer(){
   if(!bidderConn||G.phase!=='bidding'||G.paused) return;
   const p=G.Q[G.idx];if(!p) return;
-  bidderConn.send({type:'PASS',pid:p.id});
+  const iPassed=!!(G.passed||{})[myTid];
+  bidderConn.send({type:iPassed?'UNPASS':'PASS',pid:p.id});
 }
 
 // ═══════ HOST CONTROLS ═══════
@@ -2080,8 +2090,8 @@ function renderBidderUI(){
     sub.textContent='';sub.className='bid-sub';
     if(passStatus) passStatus.textContent=`${passedCount} team(s) not interested yet`;
   } else if(iPassed){
-    btn.textContent='Passed On This Player';btn.className='big-btn';
-    sub.textContent='You marked not interested for this player.';sub.className='bid-sub warn';
+    btn.textContent='Passed — tap Undo to re-enter';btn.className='big-btn';
+    sub.textContent='Tap "↩ Undo" to remove your pass and bid.';sub.className='bid-sub warn';
     if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed`;
   } else {
     btn.textContent=`🔔 BID  ${F(nb)}`;btn.className='big-btn pulsing';
@@ -2089,9 +2099,9 @@ function renderBidderUI(){
     if(passStatus) passStatus.textContent=`${passedCount} team(s) have passed so far`;
   }
   if(passBtn){
-    passBtn.disabled=iLead||iPassed;
+    passBtn.disabled=iLead;
     passBtn.className='pass-btn'+(iPassed?' active-pass':'');
-    passBtn.textContent=iPassed?'🙅 Not Interested Sent':'🙅 Not Interested';
+    passBtn.textContent=iPassed?'↩ Undo Not Interested':'🙅 Not Interested';
   }
   renderSquadsTab();renderUnsoldTab();renderPurseTab();renderWatchTab();
 }
