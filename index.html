@@ -1476,7 +1476,7 @@ function _rebuildQueueFromPL(){
   (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNames.add(p.n)));
   // All remaining PL players not on any team, fully shuffled
   G.Q=PL.filter(p=>!soldNames.has(p.n)).sort(()=>Math.random()-.5);
-  G.idx=0;G.unsoldList=[];G.skippedList=[];G.passed={};
+  G.idx=0;G.bid=0;G.bidder=null;G.unsoldList=[];G.skippedList=[];G.passed={};G.phase='bidding';
 }
 function renderRecoveredScreen(){
   if(amHost){
@@ -1627,7 +1627,7 @@ function updateConnCount(){
 function handleBidderMsg(conn,msg){
   if(msg.type==='JOIN'){
     const existsById=G.teams.find(t=>t.id===conn.peer);
-    const existsByName=!existsById&&G.teams.find(t=>t.name===msg.name);
+    const existsByName=!existsById&&G.teams.find(t=>t.name.trim().toLowerCase()===(msg.name||'').trim().toLowerCase());
     if(existsById){
       conn.send({type:'STATE',G});
     } else if(existsByName){
@@ -2370,7 +2370,7 @@ function renderBidderUI(){
   }
   // BID button
   const btn=el('big-btn'),sub=el('bid-sub'),passBtn=el('pass-btn'),passStatus=el('pass-status');
-  if(!btn||!sub||!me) return;
+  if(!btn||!sub||!me){btn&&(btn.disabled=true)&&(btn.textContent='⏳ Connecting...');return;}
   const iPassed=!!(G.passed||{})[myTid];
   const passedCount=Object.keys(G.passed||{}).length;
   if(G.phase!=='bidding'||G.paused){
