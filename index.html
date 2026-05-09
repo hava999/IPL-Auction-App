@@ -2061,8 +2061,12 @@ function setPickFilter(f,e){
 function renderPickList(){
   const q=el('pick-search').value.toLowerCase();
   const soldIds=new Set();G.teams.forEach(t=>t.players.forEach(p=>soldIds.add(p.id)));
+  const inQ=new Set(G.Q.map(p=>p.id));
+  const inU=new Set((G.unsoldList||[]).map(p=>p.id));
   let pool=G.Q.slice(G.idx).map(p=>({...p,_src:'queue'}));
-  G.unsoldList.forEach(p=>{if(!soldIds.has(p.id)) pool.push({...p,_src:'unsold'});});
+  (G.unsoldList||[]).forEach(p=>{if(!soldIds.has(p.id)) pool.push({...p,_src:'unsold'});});
+  // include PL players not yet in queue/unsold/sold
+  PL.forEach(p=>{if(!soldIds.has(p.id)&&!inQ.has(p.id)&&!inU.has(p.id)) pool.push({...p,_src:'queue'});});
   if(q) pool=pool.filter(p=>p.n.toLowerCase().includes(q));
   if(pickFilter==='queue') pool=pool.filter(p=>p._src==='queue');
   else if(pickFilter==='unsold') pool=pool.filter(p=>p._src==='unsold');
@@ -2085,8 +2089,13 @@ function pickPlayer(pid){
   if(qIdx>=G.idx){
     const[p]=G.Q.splice(qIdx,1);G.Q.splice(G.idx,0,p);
   } else {
-    const uIdx=G.unsoldList.findIndex(p=>p.id===pid);
+    const uIdx=(G.unsoldList||[]).findIndex(p=>p.id===pid);
     if(uIdx>=0){const[p]=G.unsoldList.splice(uIdx,1);G.Q.splice(G.idx,0,p);}
+    else{
+      // Player from updated PL not yet in queue — add directly
+      const pl=PL.find(p=>p.id===pid);
+      if(pl&&!soldIds.has(pid)) G.Q.splice(G.idx,0,{...pl});
+    }
   }
   G.bid=0;G.bidder=null;G.ts=Date.now();G.paused=false;
   closePickModal();broadcast();startTick();
