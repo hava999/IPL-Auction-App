@@ -1627,7 +1627,8 @@ function updateConnCount(){
 function handleBidderMsg(conn,msg){
   if(msg.type==='JOIN'){
     const existsById=G.teams.find(t=>t.id===conn.peer);
-    const existsByName=!existsById&&G.teams.find(t=>t.name.trim().toLowerCase()===(msg.name||'').trim().toLowerCase());
+    const normN=s=>(s||'').trim().toLowerCase().replace(/\bxi\b/g,'x1').replace(/\bxi$/,'x1');
+    const existsByName=!existsById&&G.teams.find(t=>normN(t.name)===normN(msg.name));
     if(existsById){
       conn.send({type:'STATE',G});
     } else if(existsByName){
