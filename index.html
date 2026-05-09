@@ -1465,8 +1465,6 @@ function hydrateFromSnapshot(s){
   }
 }
 function _rebuildQueueFromPL(){
-  const soldNames=new Set();
-  (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNames.add(p.n)));
   // Re-map team players to current PL data by name (fixes IDs/roles)
   (G.teams||[]).forEach(t=>{
     t.players=t.players.map(sp=>{
@@ -1474,12 +1472,11 @@ function _rebuildQueueFromPL(){
       return pl?{...pl,sp:sp.sp}:{...sp};
     });
   });
-  const soldNamesNow=new Set();
-  (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNamesNow.add(p.n)));
-  const mq=PL.filter(p=>p.mq&&!soldNamesNow.has(p.n));
-  const rest=PL.filter(p=>!p.mq&&!soldNamesNow.has(p.n)).sort(()=>Math.random()-.5);
-  G.Q=[...mq,...rest];
-  G.idx=0;G.unsoldList=[];G.passed={};
+  const soldNames=new Set();
+  (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNames.add(p.n)));
+  // All remaining PL players not on any team, fully shuffled
+  G.Q=PL.filter(p=>!soldNames.has(p.n)).sort(()=>Math.random()-.5);
+  G.idx=0;G.unsoldList=[];G.skippedList=[];G.passed={};
 }
 function renderRecoveredScreen(){
   if(amHost){
