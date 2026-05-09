@@ -858,6 +858,7 @@ a{color:inherit}
           <button class="hb-ovr" onclick="openReauctionModal()" style="border-color:rgba(99,102,241,.35);color:#A5B4FC">↩ Re-auction</button>
           <button class="hb-relist" id="hb-relist" onclick="hRelist()" disabled>🔄 Re-list Unsold</button>
         </div>
+        <button class="hb-skip" onclick="hSortQueueByRating()" style="color:#60A5FA;border-color:rgba(96,165,250,.3);margin-top:4px">↕ Sort Remaining by Rating (High → Low)</button>
       </div>
     </div>
     <div class="side right">
@@ -1446,7 +1447,7 @@ function loadSession(){
   try{return JSON.parse(localStorage.getItem(STORE_KEY)||'null');}catch(e){return null;}
 }
 function setupFreshAuction(num){
-  const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort(()=>Math.random()-.5);
+  const mq=PL.filter(p=>p.mq),rest=PL.filter(p=>!p.mq).sort((a,b)=>(b.rat||0)-(a.rat||0)||(b.b||0)-(a.b||0));
   G={teams:[],Q:[...mq,...rest],unsoldList:[],skippedList:[],idx:0,bid:0,bidder:null,
      ts:Date.now(),phase:'lobby',sold:0,unsold:0,skipped:0,numT:num,paused:false,pauseRem:SECS,relisted:false,passed:{},chat:[]};
   bidHistory=[];auctionLog=[];unreadChat=0;pendingPauseReq=null;
@@ -1476,7 +1477,7 @@ function _rebuildQueueFromPL(){
   const soldNames=new Set();
   (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNames.add(p.n)));
   // All remaining PL players not on any team, fully shuffled
-  G.Q=PL.filter(p=>!soldNames.has(p.n)).sort(()=>Math.random()-.5);
+  G.Q=PL.filter(p=>!soldNames.has(p.n)).sort((a,b)=>(b.rat||0)-(a.rat||0)||(b.b||0)-(a.b||0));
   G.idx=0;G.bid=0;G.bidder=null;G.unsoldList=[];G.skippedList=[];G.passed={};G.phase='bidding';
 }
 function renderRecoveredScreen(){
@@ -1816,6 +1817,13 @@ function doStart(){
   broadcast();go('pg-host');startTick();
   prefetchImages(0,G.Q.length); // pre-warm all player images at start
   systemChat('Auction started! Good luck everyone 🏏');
+}
+function hSortQueueByRating(){
+  if(!amHost) return;
+  const remaining=G.Q.slice(G.idx).sort((a,b)=>(b.rat||0)-(a.rat||0)||(b.b||0)-(a.b||0));
+  G.Q=[...G.Q.slice(0,G.idx),...remaining];
+  broadcast();renderHostUI();
+  toast('Queue sorted: highest rated players first');
 }
 function hSold(){if(!amHost||!G.bidder||G.paused) return;clearInterval(tickId);doSold();}
 function hUnsold(){if(!amHost) return;clearInterval(tickId);doUnsold();}
