@@ -1423,7 +1423,7 @@ let pendingPauseReq=null; // {peerId, teamName}
 let pauseReqSent=false;
 let chatMessages=[]; // [{sender,text,ts,isSystem,isEmoji}]
 let myDisplayName='Host';
-let reconnectTimer=null, _wasConnected=false;
+let reconnectTimer=null, _wasConnected=false, _hadSavedSession=false;
 let suppressAutoRestore=false;
 
 // ═══════ GLOBAL STATE ═══════
@@ -1454,6 +1454,7 @@ function setupFreshAuction(num){
 }
 function hydrateFromSnapshot(s){
   amHost=!!s.amHost;roomCode=s.roomCode||'';myTid=s.myTid||'';myName=s.myName||'';myTeamName=s.myTeamName||'';
+  _hadSavedSession=!!s.myTid;
   myDisplayName=s.myDisplayName||(amHost?'Host':myTeamName||'Bidder');
   G=s.G||G;bidHistory=Array.isArray(s.bidHistory)?s.bidHistory:[];auctionLog=Array.isArray(s.auctionLog)?s.auctionLog:[];
   myWatchlist=new Set(Array.isArray(s.watchlist)?s.watchlist:[]);
@@ -1773,7 +1774,6 @@ function doJoin(){
   if(!name||!team||!code||code.length<6){toast('Fill all fields and enter the 6-digit code');return;}
   el('join-btn').disabled=true;el('join-connecting').classList.add('show');
   roomCode=code;amHost=false;myName=name;myTeamName=team;myDisplayName=team;
-  const hadSession=!!myTid; // true when restoring a saved session
   myTid=myTid||('bidder-'+Math.random().toString(36).substring(2,10));
   if(bidderPeer&&!bidderPeer.destroyed) try{bidderPeer.destroy();}catch(e){}
   bidderPeer=new Peer(myTid,{debug:0});
@@ -1784,7 +1784,7 @@ function doJoin(){
       setTimeout(()=>{if(roomCode) doJoin();},1500);
       return;
     }
-    if(e.type==='peer-unavailable'&&(hadSession||_wasConnected)){
+    if(e.type==='peer-unavailable'&&(_hadSavedSession||_wasConnected)){
       // Host not ready yet during recovery — keep retrying silently
       el('join-connecting').classList.remove('show');el('join-btn').disabled=false;
       scheduleReconnect();
