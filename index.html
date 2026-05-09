@@ -1457,6 +1457,29 @@ function hydrateFromSnapshot(s){
   myDisplayName=s.myDisplayName||(amHost?'Host':myTeamName||'Bidder');
   G=s.G||G;bidHistory=Array.isArray(s.bidHistory)?s.bidHistory:[];auctionLog=Array.isArray(s.auctionLog)?s.auctionLog:[];
   myWatchlist=new Set(Array.isArray(s.watchlist)?s.watchlist:[]);
+  // Rebuild queue from current PL if stale (player names don't match current DB)
+  if(G.Q&&G.Q.length>0){
+    const plMap=new Map(PL.map(p=>[p.id,p.n]));
+    const stale=G.Q.some(qp=>plMap.get(qp.id)!==qp.n);
+    if(stale) _rebuildQueueFromPL();
+  }
+}
+function _rebuildQueueFromPL(){
+  const soldNames=new Set();
+  (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNames.add(p.n)));
+  // Re-map team players to current PL data by name (fixes IDs/roles)
+  (G.teams||[]).forEach(t=>{
+    t.players=t.players.map(sp=>{
+      const pl=PL.find(p=>p.n===sp.n);
+      return pl?{...pl,sp:sp.sp}:{...sp};
+    });
+  });
+  const soldNamesNow=new Set();
+  (G.teams||[]).forEach(t=>t.players.forEach(p=>soldNamesNow.add(p.n)));
+  const mq=PL.filter(p=>p.mq&&!soldNamesNow.has(p.n));
+  const rest=PL.filter(p=>!p.mq&&!soldNamesNow.has(p.n)).sort(()=>Math.random()-.5);
+  G.Q=[...mq,...rest];
+  G.idx=0;G.unsoldList=[];G.passed={};
 }
 function renderRecoveredScreen(){
   if(amHost){
