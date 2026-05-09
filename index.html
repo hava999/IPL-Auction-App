@@ -2061,18 +2061,17 @@ function setPickFilter(f,e){
 function renderPickList(){
   const q=el('pick-search').value.toLowerCase();
   const soldIds=new Set();G.teams.forEach(t=>t.players.forEach(p=>soldIds.add(p.id)));
-  const inQ=new Set(G.Q.map(p=>p.id));
-  const inU=new Set((G.unsoldList||[]).map(p=>p.id));
-  let pool=G.Q.slice(G.idx).map(p=>({...p,_src:'queue'}));
-  (G.unsoldList||[]).forEach(p=>{if(!soldIds.has(p.id)) pool.push({...p,_src:'unsold'});});
-  // include PL players not yet in queue/unsold/sold
-  PL.forEach(p=>{if(!soldIds.has(p.id)&&!inQ.has(p.id)&&!inU.has(p.id)) pool.push({...p,_src:'queue'});});
+  const unsoldIds=new Set((G.unsoldList||[]).map(p=>p.id));
+  // Always use full PL as source of truth so new players always appear
+  let pool=PL.filter(p=>!soldIds.has(p.id)).map(p=>({
+    ...p,_src:unsoldIds.has(p.id)?'unsold':'queue'
+  }));
   if(q) pool=pool.filter(p=>p.n.toLowerCase().includes(q));
   if(pickFilter==='queue') pool=pool.filter(p=>p._src==='queue');
   else if(pickFilter==='unsold') pool=pool.filter(p=>p._src==='unsold');
   else if(['BAT','BOWL','AR','WK'].includes(pickFilter)) pool=pool.filter(p=>p.r===pickFilter);
   else if(pickFilter==='overseas') pool=pool.filter(p=>p.overseas);
-  el('pick-list').innerHTML=pool.slice(0,60).map(p=>`
+  el('pick-list').innerHTML=pool.slice(0,200).map(p=>`
     <div class="pick-item${p._src==='unsold'?' unsold-p':''}" onclick="pickPlayer(${p.id})">
       <div class="pick-left">
         <div class="pick-n">${p.n}${p.mq?' ⭐':''}</div>
